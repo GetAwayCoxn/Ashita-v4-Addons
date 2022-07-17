@@ -75,7 +75,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     end
 
     local t = os.clock() - vars.base;
-    if t > 15 then
+    if t > 5 then
         vars.new = GetWeather();
     end
     if vars.old ~= vars.new then
