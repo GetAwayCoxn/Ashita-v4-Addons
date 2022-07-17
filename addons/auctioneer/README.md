@@ -16,7 +16,7 @@ Item names with more than one term need to be quotations. Auto-translate should 
 |menu|/ah or /ah menu will open the auction house menu and update whatever items you have for sale|
 |buy|will place a bid. /ah buy [item] [single/stack] [price]|
 ||eg: /ah buy "silent oil" single 1,000,000|
-|sell|same as buy but for selling. /ah sell [item] [single|stack] [price]|
+|sell|same as buy but for selling. /ah sell [item] [single/stack] [price]|
 ||eg: /ah sell remedy stack 40000|
 |show|will show the AH overlay(unless you have nothing up for sale)|
 |hide|will hide the AH overlay|
