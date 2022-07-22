@@ -1,6 +1,6 @@
 addon.name      = 'Puphelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.03';
+addon.version   = '1.04';
 addon.desc      = 'Does puppetmaster things. Based on my runehelper addon for Ashita v4, inspired by pupper addon by Towbes for Ashita v3';
 addon.link      = 'https://github.com/GetAwayCoxn/Pup-Helper';
 
@@ -20,7 +20,8 @@ local manager = {
     repair = {0,},
     autodeploy = {false,},
     autocooldown = {true,},
-    autolight = {0,90},
+    autolight = {50,90},
+    autorepairholder = {-1,},
 };
 
 ashita.events.register('d3d_present', 'present_cb', function ()
@@ -46,7 +47,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         --[[if (AshitaCore:GetMemoryManager():GetEntity():GetStatus(PetID) == 1) and (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(TargetID) <= 1) then
             return;
         end]]
-
+        
+        
         --Do auto Deploy
         if (TargetID ~= 0 or TargetID ~= nil) and (manager.autodeploy[1] == true) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0)) == 1) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(PetID) == 0) and (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(TargetID) > 10) then
             AshitaCore:GetChatManager():QueueCommand(1, '/ja "Deploy" <t>');
@@ -84,7 +86,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         if (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(PetID) < manager.autolight[1]) then
             manager.menu_holders[1] = 1;
         elseif (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(PetID) >= manager.autolight[2]) then
-            manager.menu_holders[1] = manager.menu_holders[1];
+            manager.menu_holders[1] = manager.autorepairholder[1];
         end
 
         --Do the maneuver things
@@ -139,6 +141,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         local selection1 = {manager.menu_holders[1] + 1};
         if (imgui.Combo('Maneuver 1', selection1, 'None\0Dark\0Light\0Earth\0Wind\0Fire\0Ice\0Thunder\0Water\0')) then
             manager.menu_holders[1] = selection1[1] - 1;
+            manager.autorepairholder[1] = manager.menu_holders[1];
         end
         
         local selection2 = {manager.menu_holders[2] + 1};
@@ -236,5 +239,6 @@ ashita.events.register('command', 'command_cb', function (e)
                 end
             end
         end
+        manager.autorepairholder[1] = manager.menu_holders[1];
     end
 end);
