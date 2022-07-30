@@ -1,6 +1,6 @@
 addon.name      = 'Runehelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.03';
+addon.version   = '1.04';
 addon.desc      = 'Does runefencer things.';
 addon.link      = 'https://github.com/GetAwayCoxn/Rune-Helper';
 
@@ -9,7 +9,9 @@ local imgui = require('imgui');
 
 local Towns = T{'Tavnazian Safehold','Al Zahbi','Aht Urhgan Whitegate','Nashmau','Southern San d\'Oria [S]','Bastok Markets [S]','Windurst Waters [S]','San d\'Oria-Jeuno Airship','Bastok-Jeuno Airship','Windurst-Jeuno Airship','Kazham-Jeuno Airship','Southern San d\'Oria','Northern San d\'Oria','Port San d\'Oria','Chateau d\'Oraguille','Bastok Mines','Bastok Markets','Port Bastok','Metalworks','Windurst Waters','Windurst Walls','Port Windurst','Windurst Woods','Heavens Tower','Ru\'Lude Gardens','Upper Jeuno','Lower Jeuno','Port Jeuno','Rabao','Selbina','Mhaura','Kazham','Norg','Mog Garden','Celennia Memorial Library','Western Adoulin','Eastern Adoulin',
 };
-
+local now = os.time();
+local runeTime = now;
+local pulseTime = now;
 local manager = {
     is_open = {false,},
     size = {410,175},
@@ -34,7 +36,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     if (Player:GetIsZoning() ~= 0) then
         return;
     end
-
+    now = os.time();
     -- Do Work here if Enabled and before the is_open check
     if (manager.enabled == 'Enabled') then
         --Set recasts, runes dont work correcty however due to recasts addon i think, every rune is Ignis? This works for our needs for now however
@@ -53,14 +55,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                     total = total + 1;
                 elseif (buffString ~= nil) and (buffString == 'Mounted') then
                     manager.enabled = 'Disabled';
-                elseif (buffString ~= nil) and (buffString == 'Sleep') then
+                elseif (buffString ~= nil) and ((buffString == 'Sleep') or (buffString == 'Charm') or (buffString == 'Terror') or (buffString == 'Petrification') or (buffString == 'Stun')) then
                     return;
                 end
             end
         end
 
         --Do the rune things
-        if (runerecast == 0) then
+        if (runerecast == 0) and (now - runeTime > 2) then
             if (manager.menu_holders[1] ~= -1) then
                 if (manager.runes[manager.menu_holders[1] + 1][2] == 0) then
                     AshitaCore:GetChatManager():QueueCommand(1, '/ja "' .. manager.runes[manager.menu_holders[1] + 1][1] .. '" <me>');
@@ -90,10 +92,11 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                     end
                 end
             end
+            runeTime = now;
         end
 
         --Do the pulse things
-        if (pulserecast == 0) and (total == 3) then
+        if (pulserecast == 0) and (total == 3) and (now - pulseTime > 2) then
             local MPP = AshitaCore:GetMemoryManager():GetParty():GetMemberMPPercent(0);
             local HPP = AshitaCore:GetMemoryManager():GetParty():GetMemberHPPercent(0);
             if (manager.runes[8][2] == 3) and (MPP < manager.pulse[1]) then
@@ -101,6 +104,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
             elseif (HPP < manager.pulse[1]) then
                 AshitaCore:GetChatManager():QueueCommand(1, '/ja "Vivacious Pulse" <me>');
             end
+            pulseTime = now;
         end
     end
 
@@ -108,6 +112,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         return;
     end
 
+    --Draw things
     imgui.SetNextWindowSize(manager.size);
     if (imgui.Begin('RuneHelper', manager.is_open, ImGuiWindowFlags_NoDecoration)) then
         imgui.TextColored(manager.text_color, 'Use /runehelper or /rh to hide');
