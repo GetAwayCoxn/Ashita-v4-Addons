@@ -69,7 +69,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                 end
             else
                 --no food in Inv 
-                print(chat.header('NomNom'):append(chat.message('Invalid Command')));
+                print(chat.header('NomNom'):append(chat.message('Yikes! No more ' .. tostring(settings.food[settings.menu_holder[1]+1][1]))));
                 settings.enabled = 'Disabled';
             end
         end
