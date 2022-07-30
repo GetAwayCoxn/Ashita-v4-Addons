@@ -1,5 +1,6 @@
 # Zeni-Helper
- Ashita v4 addon for FFXI to help with ZNM and PW farm tracking. Intended to be very simple display of what you have and what you need for items and keyitems and allows quick and easy spawning of NMs
+
+Ashita v4 addon for FFXI to help with ZNM and PW farm tracking. Intended to be very simple display of what you have and what you need for items and keyitems and allows quick and easy spawning of NMs
 
 ## Basics:
 
