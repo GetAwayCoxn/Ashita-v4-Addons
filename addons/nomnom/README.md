@@ -4,15 +4,13 @@ Hungry?! This Ashita v4 addon will look in your inventory for whatever food you 
 
 ## Basics:
 
-/nn       -- show/hide
+/nn --show/hide
+
+/nn toggle --enable/disable without using the GUI
 
 ## Notes:
 
--Key Items update automatically
-
--Items and Jettons/Zeni amounts update each time the display is refreshed with /zh
-
--Double clicking anywhere in the window will hide as well
+-Hover over the (?) on the GUI for more info
 
 ## To Do:
 
@@ -23,4 +21,6 @@ Hungry?! This Ashita v4 addon will look in your inventory for whatever food you 
 
 ## Current GUI: 
 
+![nomnom1](https://user-images.githubusercontent.com/66495755/181935932-d31d19d4-3341-48f2-91f3-2d034e21b336.png)
 
+![nomnom2](https://user-images.githubusercontent.com/66495755/181935934-26afbc2c-ad43-42bc-aa39-035dd0b8a3c2.png)
