@@ -1,6 +1,6 @@
 addon.name      = 'Puphelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.05';
+addon.version   = '1.06';
 addon.desc      = 'Does puppetmaster things. Based on my runehelper addon for Ashita v4, inspired by pupper addon by Towbes for Ashita v3';
 addon.link      = 'https://github.com/GetAwayCoxn/Pup-Helper';
 
@@ -208,10 +208,18 @@ end
 
 function CountItemId(id)
     local total = 0;
-    for i = 0, 80 do
-        local item = AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(0, i); --0 for actual inventory only
-        if (item ~= nil and item.Id == id) then
-            total = total + item.Count;
+    for x = 1, 9 do
+        local c = 0;
+        if x == 2 then -- offset to not check unwanted bags
+            c = 8;
+        elseif x > 2 then
+            c = x + 7;
+        end
+        for i = 1, 81 do
+            local item = AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(c, i);
+            if (item ~= nil and item.Id == id) then
+                total = total + item.Count;
+            end
         end
     end
     return total;
