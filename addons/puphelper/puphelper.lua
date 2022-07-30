@@ -1,6 +1,6 @@
 addon.name      = 'Puphelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.04';
+addon.version   = '1.05';
 addon.desc      = 'Does puppetmaster things. Based on my runehelper addon for Ashita v4, inspired by pupper addon by Towbes for Ashita v3';
 addon.link      = 'https://github.com/GetAwayCoxn/Pup-Helper';
 
@@ -9,6 +9,11 @@ local imgui = require('imgui');
 
 local Towns = T{'Tavnazian Safehold','Al Zahbi','Aht Urhgan Whitegate','Nashmau','Southern San d\'Oria [S]','Bastok Markets [S]','Windurst Waters [S]','San d\'Oria-Jeuno Airship','Bastok-Jeuno Airship','Windurst-Jeuno Airship','Kazham-Jeuno Airship','Southern San d\'Oria','Northern San d\'Oria','Port San d\'Oria','Chateau d\'Oraguille','Bastok Mines','Bastok Markets','Port Bastok','Metalworks','Windurst Waters','Windurst Walls','Port Windurst','Windurst Woods','Heavens Tower','Ru\'Lude Gardens','Upper Jeuno','Lower Jeuno','Port Jeuno','Rabao','Selbina','Mhaura','Kazham','Norg','Mog Garden','Celennia Memorial Library','Western Adoulin','Eastern Adoulin',
 };
+local now = os.time();
+local deployTime = now;
+local manTime = now;
+local coolTime = now;
+local repTime = now;
 
 local manager = {
     is_open = {false,},
@@ -40,18 +45,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     if (Player:GetIsZoning() ~= 0) then
         return;
     end
-
+    now = os.time();
     -- Do Work here if Enabled and before the is_open check
     if (manager.enabled == 'Enabled') and (PetID ~= 0 or PetID ~= nil) then
-        -- Don't do stuff if mob is basically dead (trying to prevent hangs when killing ambu stuff and zoning right away)
-        --[[if (AshitaCore:GetMemoryManager():GetEntity():GetStatus(PetID) == 1) and (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(TargetID) <= 1) then
-            return;
-        end]]
-        
-        
         --Do auto Deploy
-        if (TargetID ~= 0 or TargetID ~= nil) and (manager.autodeploy[1] == true) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0)) == 1) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(PetID) == 0) and (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(TargetID) > 10) then
+        if (TargetID ~= 0 or TargetID ~= nil) and (manager.autodeploy[1] == true) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0)) == 1) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(PetID) == 0) and (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(TargetID) > 10) and (now - deployTime > 5) then
             AshitaCore:GetChatManager():QueueCommand(1, '/ja "Deploy" <t>');
+            deployTime = now;
         end
 
         --Set recasts, maneuvers dont work correcty however due to recasts addon i think, every maneuver is Fire? This works for our needs for now however
@@ -78,8 +78,9 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         end
 
         --Do cooldown things
-        if (cooldowntime == 0) and (manager.maneuvers[9][2] ~= 0) and (manager.autocooldown[1] == true) then
+        if (cooldowntime == 0) and (manager.maneuvers[9][2] ~= 0) and (manager.autocooldown[1] == true) and (now - coolTime > 2) then
             AshitaCore:GetChatManager():QueueCommand(1, '/ja "Cooldown" <me>');
+            coolTime = now;
         end
 
         --Do autolight things
@@ -90,7 +91,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         end
 
         --Do the maneuver things
-        if (manrecast == 0) and (manager.maneuvers[9][2] == 0) then
+        if (manrecast == 0) and (manager.maneuvers[9][2] == 0) and (now - manTime > 2) then
             if (manager.menu_holders[1] ~= -1) then
                 if (manager.maneuvers[manager.menu_holders[1] + 1][2] == 0) then
                     AshitaCore:GetChatManager():QueueCommand(1, '/ja "' .. manager.maneuvers[manager.menu_holders[1] + 1][1] .. '" <me>');
@@ -120,12 +121,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                     end
                 end
             end
+            manTime = now;
         end
 
         --Do the repair things
-        if (repairtime == 0) and (oils > 0) then
+        if (repairtime == 0) and (oils > 0) and (now - repTime > 2) then
             if (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(PetID) < manager.repair[1]) and (tonumber(AshitaCore:GetMemoryManager():GetEntity():GetDistance(PetID)) < 20) then
                 AshitaCore:GetChatManager():QueueCommand(1, '/ja "Repair" <me>');
+                repTime = now;
             end
         end
     end
@@ -134,6 +137,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         return;
     end
 
+    --Draw things
     imgui.SetNextWindowSize(manager.size);
     if (imgui.Begin('Puphelper', manager.is_open, ImGuiWindowFlags_NoDecoration)) then
         imgui.TextColored(manager.text_color, tostring(' +3 oils:  ' .. oils .. '                           Use /ph to hide'));
