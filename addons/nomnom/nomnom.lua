@@ -69,7 +69,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                 end
             else
                 --no food in Inv 
-                print(chat.header('NomNom'):append(chat.message('Yikes! No more ' .. tostring(settings.food[settings.menu_holder[1]+1][1]))));
+                print(chat.header('NomNom'):append(chat.message('Yikes! No more ' .. settings.food[settings.menu_holder[1]+1][1])));
                 settings.enabled = 'Disabled';
             end
         end
@@ -128,7 +128,7 @@ function CountItemId(id)
     return total;
 end
 
-function CountItemName(str)
+function CountItemName(str)--Might add cmd to add food by name
     local total = 0;
     str = tostring(str);
     for i = 1, 81 do
