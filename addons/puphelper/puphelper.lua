@@ -1,6 +1,6 @@
 addon.name      = 'Puphelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.06';
+addon.version   = '1.07';
 addon.desc      = 'Does puppetmaster things. Based on my runehelper addon for Ashita v4, inspired by pupper addon by Towbes for Ashita v3';
 addon.link      = 'https://github.com/GetAwayCoxn/Pup-Helper';
 
@@ -71,7 +71,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                     total = total + 1;
                 elseif (buffString ~= nil) and (buffString == 'Mounted') then
                     manager.enabled = 'Disabled';
-                elseif (buffString ~= nil) and (buffString == 'Sleep') then
+                elseif (buffString ~= nil) and ((buffString == 'Sleep') or (buffString == 'Terror') or (buffString == 'Charm') or (buffString == 'Stun') or (buffString == 'Petrification') or (buffString == 'Amnesia')) then
                     return;
                 end
             end
