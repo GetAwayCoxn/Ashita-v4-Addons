@@ -1,6 +1,6 @@
 # TH Tracker
 
-Ashita v4 addon for FFXI to attempt to track TH levels on mobs.
+Ashita v4 addon for FFXI to track TH levels on mobs.
 
 ## Commands:
 
@@ -26,5 +26,6 @@ Ashita v4 addon for FFXI to attempt to track TH levels on mobs.
 
 -Should add function to establish your actual TH+ from gear instead of assuming max
 
-## Current GUI: 
+## Current Text Overlay: 
 
+![THtrackerGUI](https://user-images.githubusercontent.com/66495755/184027421-2eb820ff-342d-412a-905e-87b124830fb2.png)
