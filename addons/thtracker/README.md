@@ -6,7 +6,7 @@ Ashita v4 addon for FFXI to track TH levels on mobs.
 
 |**Command**|**Description**|
 |------------:|:---|
-|/tht|Will show or hide the text box|
+|/tht|Will show or hide the text box (1.01 saves this on per job basis now)|
 |/tht time [number]|Will set the time (in seconds) to delete dead mobs off the list, defaults to 15 if no number entered|
 ||Example: "/tht time" will set to 15, "/tht time 20" will set to 20 seconds|
 
