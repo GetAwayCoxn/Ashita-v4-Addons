@@ -1,6 +1,6 @@
 addon.name      = 'thtracker';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.0';
+addon.version   = '1.01';
 addon.desc      = 'Tracks TH on mobs, this is not a port';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -12,10 +12,11 @@ local display = T{};
 local osd = T{};
 local mobs = T{};-- [id] = {name,HPP,THcount}
 local defaults = T{
-	visible = true,
+	visibleJob = T{[1] = true,[2] = true,[3] = true,[4] = true,[5] = true,[6] = true,[7] = true,[8] = true,[9] = true,[10] = true,[11] = true,[12] = true,[13] = true,[14] = true,[15] = true,[16] = true,[17] = true,[18] = true,[19] = true,[20] = true,[21] = true,[22] = true,},
+    visible = true,
     displayTime = 15,
-    deadColor = '|cFFFF0000|';
-    fightColor = '|cFFFFFF00|';
+    deadColor = '|cFFFF0000|',
+    fightColor = '|cFFFFFF00|',
 	font_family = 'Arial',
 	font_height = 12,
 	color = 0xFFFFFFFF,
@@ -96,7 +97,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     local t = 0;
     display.text = '';
 
-    if not osd.visible then
+    if not osd.visibleJob[player:GetMainJob(0)] then
         return;
     end
 
@@ -137,7 +138,8 @@ ashita.events.register('command', 'command_cb', function (e)
     e.blocked = true;
 
     if #args == 1 then
-        osd.visible = not osd.visible;
+        local playerJob = AshitaCore:GetMemoryManager():GetPlayer():GetMainJob(0);
+        osd.visibleJob[playerJob] = not osd.visibleJob[playerJob];
     elseif args[2] == 'time' then
         osd.displayTime = tonumber(args[3]) or defaults.displayTime;
     end
