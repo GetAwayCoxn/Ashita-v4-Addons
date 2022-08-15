@@ -1,6 +1,6 @@
 # Auctioneer
 
-A port of Ivaar's auctioneer for Ashita v4 with minimal modifications.
+A port of Ivaar's auctioneer for Ashita v4 with minimal modifications. https://github.com/Ivaar/Ashita-addons/tree/master/Auctioneer
 
 This uses packets and can get you in trouble if you are doing things where you are not supposed to. 
 
