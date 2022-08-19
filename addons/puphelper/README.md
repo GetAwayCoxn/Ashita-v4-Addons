@@ -8,11 +8,14 @@ Very straight forward to use, commands are:
 
 /puphelper toggle or /ph toggle to engage or disengage
 
+/puphelper deploy or /ph deploy to toggle the auto deploy feature
+
 /puphelper set or /ph set with any three of dark|light|earth|wind|fire|ice|thunder|water to set maneuvers through keyboard input
 
 Credit to Thorny for his gData.GetBuffCount function from the luashitacast addon, I modified it for my use case.
 
 ## To-Do's
+
 Consider adding other inputs via keyboard
 
 General code clean up

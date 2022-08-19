@@ -1,6 +1,6 @@
 addon.name      = 'Puphelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.07';
+addon.version   = '1.08';
 addon.desc      = 'Does puppetmaster things. Based on my runehelper addon for Ashita v4, inspired by pupper addon by Towbes for Ashita v3';
 addon.link      = 'https://github.com/GetAwayCoxn/Pup-Helper';
 
@@ -49,7 +49,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     -- Do Work here if Enabled and before the is_open check
     if (manager.enabled == 'Enabled') and (PetID ~= 0 or PetID ~= nil) then
         --Do auto Deploy
-        if (TargetID ~= 0 or TargetID ~= nil) and (manager.autodeploy[1] == true) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0)) == 1) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(PetID) == 0) and (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(TargetID) > 10) and (now - deployTime > 5) then
+        if (TargetID ~= 0 or TargetID ~= nil) and (manager.autodeploy[1] == true) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0)) == 1) and (AshitaCore:GetMemoryManager():GetEntity():GetStatus(PetID) == 0) and (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(TargetID) > 10) and (AshitaCore:GetMemoryManager():GetEntity():GetHPPercent(TargetID) < 100) and (now - deployTime > 5) then
             AshitaCore:GetChatManager():QueueCommand(1, '/ja "Deploy" <t>');
             deployTime = now;
         end
@@ -241,6 +241,8 @@ ashita.events.register('command', 'command_cb', function (e)
         elseif (manager.enabled == 'Disabled') then
             manager.enabled = 'Enabled';
         end
+    elseif (#args >= 2 and args[2]:any('deploy')) then
+        manager.autodeploy[1] = not manager.autodeploy[1];
     elseif (#args >= 2 and args[2]:any('set')) then
         local eles = {'dark','light','earth','wind','fire','ice','thunder','water'};
         for x = 1, #eles do
