@@ -14,8 +14,6 @@ Hungry?! This Ashita v4 addon will look in your inventory for whatever food you 
 
 ## To Do:
 
--Fireworks show up in list, will find better way to isolate food items or create a exclusion table for fireworks and the like
-
 -Standing by for error fixes
 
 
