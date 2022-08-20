@@ -1,6 +1,6 @@
 addon.name      = 'thtracker';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.02';
+addon.version   = '1.03';
 addon.desc      = 'Tracks TH on mobs, this is not a port';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -15,8 +15,11 @@ local defaults = T{
 	visibleJob = T{[1] = true,[2] = true,[3] = true,[4] = true,[5] = true,[6] = true,[7] = true,[8] = true,[9] = true,[10] = true,[11] = true,[12] = true,[13] = true,[14] = true,[15] = true,[16] = true,[17] = true,[18] = true,[19] = true,[20] = true,[21] = true,[22] = true,},
     visible = true,
     displayTime = 15,
-    deadColor = '|cFFFF0000|',
-    fightColor = '|cFFFFFF00|',
+    color = 0xFFFFFFFF,
+    mobcolor = '|cFFFFFFFF|',
+	green = '|cFF00FF00|';
+    red = '|cFFFF0000|',
+    yellow = '|cFFFFFF00|',
 	font_family = 'Arial',
 	font_height = 12,
 	color = 0xFFFFFFFF,
@@ -129,6 +132,7 @@ ashita.events.register('text_in', 'text_in_cb', function(e)
         if AshitaCore:GetMemoryManager():GetEntity():GetType(index) ~= 2 then return end;
         local count = tonumber(string.match(e.message,'%d+'));
         mobs[index] = {target.Name, target.HPPercent, count, true, os.time()};
+        display.mobcolor = display.green;
     elseif (e.message:contains('hit') or e.message:contains('ranged attack') or e.message:contains('RA')) and e.message:contains(me) then
         local index = AshitaCore:GetMemoryManager():GetTarget():GetTargetIndex(0);
         if index == nil then return end;
@@ -158,9 +162,11 @@ ashita.events.register('text_in', 'text_in_cb', function(e)
         if target == nil then return end;
         if mobs[index] ~= nil then 
             if count > mobs[index][3] then
+                display.mobcolor = display.yellow;
                 mobs[index] = {target.Name, target.HPPercent, count, true, os.time()};
             end
         else
+            display.mobcolor = display.yellow;
             mobs[index] = {target.Name, target.HPPercent, count, true, os.time()};
         end
     end
@@ -190,9 +196,9 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         
         local mob = GetEntity(k);
         if v[2] == 0 then
-            display.text = display.text .. osd.deadColor .. '\n' .. v[1] .. '(' .. tostring(k) .. ')  HPP: ' .. tostring(v[2]) .. '  TH: ' .. tostring(v[3]);
+            display.text = display.text .. display.red .. '\n' .. v[1] .. '(' .. tostring(k) .. ')  HPP: ' .. tostring(v[2]) .. '  TH: ' .. tostring(v[3]);
         else
-            display.text = display.text .. osd.fightColor .. '\n' .. v[1] .. '(' .. tostring(k) .. ')  HPP: ' .. tostring(v[2]) .. '  TH: ' .. tostring(v[3]);
+            display.text = display.text .. display.mobcolor .. '\n' .. v[1] .. '(' .. tostring(k) .. ')  HPP: ' .. tostring(v[2]) .. '  TH: ' .. tostring(v[3]);
         end
     end
 
