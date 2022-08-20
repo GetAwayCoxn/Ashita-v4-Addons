@@ -9,11 +9,25 @@ interface = T{
         has = { 0.2, 0.9, 0.0, 0.9 },
         donthas = {0.5, 0.5, 0.5, 0.9 },
     },
+    autotrade = true;--change to false if you dont want to autotrade
+    tradetime = os.time();
 };
 function interface.render()
     local party = AshitaCore:GetMemoryManager():GetParty();
     local player = AshitaCore:GetMemoryManager():GetPlayer();
-    if (party:GetMemberIsActive(0) == 0 or party:GetMemberServerId(0) == 0 or not interface.is_open[1]) or player:GetIsZoning() ~= 0 then
+    if (party:GetMemberIsActive(0) == 0 or party:GetMemberServerId(0) == 0) or player:GetIsZoning() ~= 0 then
+        return;
+    end
+    local target = GetEntity(AshitaCore:GetMemoryManager():GetTarget():GetTargetIndex(0));
+    
+    if target ~= nil and interface.autotrade then
+        if data.tradeitems:haskey(target.ServerId) and math.sqrt(target.Distance) < 4 and (os.time() - interface.tradetime > 3) then
+            interface.tradetime = os.time()
+            interface.dotrade();
+        end
+    end
+
+    if  not interface.is_open[1] then
         return;
     end
 
@@ -764,7 +778,6 @@ function interface.dotrade()
         print(chat.header(addon.name) .. chat.message('Nothing targeted'));
         return;
     end
-    local party = AshitaCore:GetMemoryManager():GetParty();
 
     for k,v in pairs(data.tradeitems) do
         if target.ServerId == k then

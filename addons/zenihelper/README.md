@@ -7,6 +7,8 @@ Ashita v4 addon for FFXI to help with ZNM and PW farm tracking. Intended to be v
 /zh       -- show/hide
 
 /zh trade -- with a correct ??? targeted and correct item in your main inventory will attempt to spawn your ZNM
+
+/zh autotrade -- toggles autotrade option
              
 ## Colors:
 

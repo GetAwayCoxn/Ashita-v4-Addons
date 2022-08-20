@@ -64,7 +64,7 @@ data = T{
 			['Pandemonium Warden'] = {'Pandemonium Key', false},
 		},
 	},
-	keyitems = {
+	keyitems = T{
 		['Maroon Seal'] = 998,
 		['Apple Green Seal'] = 999,
 		['Charcoal Grey Seal'] = 1000,
@@ -87,7 +87,7 @@ data = T{
 		['Silver Sea salt'] = 1017,
 		['Cyan Deep salt'] = 1018,
 	},
-	tradeitems = {
+	tradeitems = T{
 		[16986605] = 'Hellcage Butterfly',
 		[17043917] = 'Floral Nectar',
 		[17072279] = 'Rodent Cheese',
@@ -119,6 +119,11 @@ data = T{
 		[16998901] = 'Rose Scampi',
 		[17101259] = 'Singed Buffalo',
 		[17056370] = 'Pandemonium Key',
+		--sneaking in ADL trade items
+		[17330781] = 'Odious Skull',
+		[17330782] = 'Odious Horn',
+		[17330783] = 'Odious Blood',
+		[17330784] = 'Odious Pen',
 	},
 };
 

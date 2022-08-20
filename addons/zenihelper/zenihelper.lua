@@ -1,6 +1,6 @@
 addon.name      = 'zenihelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.0';
+addon.version   = '1.01';
 addon.desc      = 'Track and displays what ZNM pops/trophies/KI\'s you have and assists in popping the NMs at the ???';
 addon.link      = 'https://github.com/GetAwayCoxn/Zeni-Helper';
 
@@ -36,5 +36,7 @@ ashita.events.register('command', 'command_cb', function (e)
         interface.is_open[1] = not interface.is_open[1];
     elseif (#args == 2 and args[2]:any('trade')) then
         interface.dotrade();
+    elseif (#args == 2 and args[2]:any('autotrade')) then
+        interface.autotrade = not interface.autotrade;
     end
 end);
