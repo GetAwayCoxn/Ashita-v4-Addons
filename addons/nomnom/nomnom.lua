@@ -1,6 +1,6 @@
 addon.name      = 'nomnom';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.01';
+addon.version   = '1.02';
 addon.desc      = 'Eats food.';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -52,13 +52,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     
     -- Do Work here if Enabled and before the is_open check
     if (settings.enabled == 'Enabled') then
-        -- Find out if full already or not
+        -- Find out if full already or not and other bad things
         local buffs = AshitaCore:GetMemoryManager():GetPlayer():GetBuffs();
         for _, buff in pairs(buffs) do
             local buffString = AshitaCore:GetResourceManager():GetString("buffs.names", buff);
-			if (buffString ~= nil) and (buffString == 'Food') then
+			if (buffString ~= nil) and (buffString == 'Food') and not full then
                 full = true;
-            elseif (buffString ~= nil) and ((buffString == 'Mounted') or (buffString == 'Weakness') or(buffString == 'Sleep') or (buffString == 'Charm') or (buffString == 'Terror') or (buffString == 'Paralysis') or (buffString == 'Stun') or (buffString == 'Petrification') or me.HPPercent <= 5) then
+            elseif (buffString ~= nil) and ((buffString == 'Mounted') or (buffString == 'Weakness') or (buffString == 'Sleep') or (buffString == 'Charm') or (buffString == 'Terror') or (buffString == 'Paralysis') or (buffString == 'Stun') or (buffString == 'Petrification') or me.HPPercent <= 5) then
                 return;
             end
         end
