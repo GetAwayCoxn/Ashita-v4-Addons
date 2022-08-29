@@ -1,6 +1,6 @@
 addon.name      = 'nomnom';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.02';
+addon.version   = '1.03';
 addon.desc      = 'Eats food.';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -58,7 +58,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
             local buffString = AshitaCore:GetResourceManager():GetString("buffs.names", buff);
 			if (buffString ~= nil) and (buffString == 'Food') and not full then
                 full = true;
-            elseif (buffString ~= nil) and ((buffString == 'Mounted') or (buffString == 'Weakness') or (buffString == 'Sleep') or (buffString == 'Charm') or (buffString == 'Terror') or (buffString == 'Paralysis') or (buffString == 'Stun') or (buffString == 'Petrification') or me.HPPercent <= 5) then
+            end
+            if (buffString ~= nil) and ((buffString == 'Mounted') or (buffString == 'Weakness') or (buffString == 'Sleep') or (buffString == 'Charm') or (buffString == 'Terror') or (buffString == 'Paralysis') or (buffString == 'Stun') or (buffString == 'Petrification') or me.HPPercent <= 5) then
                 return;
             end
         end
