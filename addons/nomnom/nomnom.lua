@@ -1,6 +1,6 @@
 addon.name      = 'nomnom';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.04';
+addon.version   = '1.05';
 addon.desc      = 'Eats food.';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -10,7 +10,7 @@ local chat = require('chat');
 
 local trytime = os.time();
 local now = os.time();
-
+local currentFood = '';
 local settings = T{
     is_open = {false,},
     size = {310,90},
@@ -20,8 +20,6 @@ local settings = T{
     menu_holder = {-1,},
     list = 'None\0',
     foods = T{},
-};
-local towns = T{'Tavnazian Safehold','Al Zahbi','Aht Urhgan Whitegate','Nashmau','Southern San d\'Oria [S]','Bastok Markets [S]','Windurst Waters [S]','San d\'Oria-Jeuno Airship','Bastok-Jeuno Airship','Windurst-Jeuno Airship','Kazham-Jeuno Airship','Southern San d\'Oria','Northern San d\'Oria','Port San d\'Oria','Chateau d\'Oraguille','Bastok Mines','Bastok Markets','Port Bastok','Metalworks','Windurst Waters','Windurst Walls','Port Windurst','Windurst Woods','Heavens Tower','Ru\'Lude Gardens','Upper Jeuno','Lower Jeuno','Port Jeuno','Rabao','Selbina','Mhaura','Kazham','Norg','Mog Garden','Celennia Memorial Library','Western Adoulin','Eastern Adoulin',
 };
 local exclusions = T{--array containing item names to be excluded
     'Air Rider','Brilliant Snow','Crackler','Festive Fan','Gysahl Bomb','Kongou Inaho','Marine Bliss','Muteppo','Popper','Shisai Kaboku','Spirit Masque','Airborne','Bubble Breeze','Datechochin','Flarelet','Ichinintousen Koma','Konron Hassen','Meifu Goma','Ouka Ranman','Popstar','Slime Rocket','Spore Bomb','Angelwing','Cracker','Falling Star','Goshikitenge','Komanezumi','Little Comet','Mog Missile','Papillion','Rengedama','Sparkling Hand','Spriggan Spark','Summer Fan','Twinkle Shower',
@@ -41,7 +39,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     now = os.time();
 
     -- Force Disabled under these conditions
-    if (player:GetIsZoning() ~= 0) or (area == nil) or (towns:contains(area)) then 
+    if (player:GetIsZoning() ~= 0) then 
 		settings.enabled = 'Disabled';
 	end
 
@@ -65,15 +63,15 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         end
         --Kick out if no food selected on menu, else eat food since no Food buff found
         if settings.menu_holder[1] >= 0 and not full and settings.enabled == 'Enabled' then
-            if (settings.food[settings.menu_holder[1]+1][2]) > 0 then
+            if (settings.food[settings.menu_holder[1]+1][1]) ~= nil and (settings.food[settings.menu_holder[1]+1][1]) == currentFood and (settings.food[settings.menu_holder[1]+1][2]) > 0 then
                 if (now - trytime) > 5 then --and myTarget.IsPlayerMoving == 0 then
-                    AshitaCore:GetChatManager():QueueCommand(1, '/item "' .. settings.food[settings.menu_holder[1]+1][1] .. '" <me>');
+                    AshitaCore:GetChatManager():QueueCommand(1, '/item "' .. currentFood .. '" <me>');
                     trytime = os.time()
                     settings.food = FindFood();
                 end
             else
                 --no food in Inv 
-                print(chat.header('NomNom'):append(chat.message('Yikes! No more ' .. settings.food[settings.menu_holder[1]+1][1])));
+                print(chat.header('NomNom'):append(chat.message('Yikes! No more ' .. currentFood)));
                 settings.enabled = 'Disabled';
             end
         end
@@ -100,6 +98,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         end
         if (imgui.Combo(name, selection, settings.list)) then
             settings.menu_holder[1] = selection[1] - 1;
+            currentFood = settings.food[settings.menu_holder[1]+1][1];
         end
         imgui.Spacing();imgui.Spacing();
         if (imgui.Button(settings.update)) then
