@@ -4,7 +4,7 @@ Hungry?! This Ashita v4 addon will look in your inventory for whatever food you 
 
 ## Basics:
 
-/nn --show/hide
+/nn --show/hide (can now also double click on the gui to hide)
 
 /nn toggle --enable/disable without using the GUI
 

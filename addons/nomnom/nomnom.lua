@@ -1,6 +1,6 @@
 addon.name      = 'nomnom';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.03';
+addon.version   = '1.04';
 addon.desc      = 'Eats food.';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -84,6 +84,11 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     end
 
     imgui.SetNextWindowSize(settings.size);
+    if imgui.IsWindowHovered(ImGuiHoveredFlags_AnyWindow) then
+        if imgui.IsMouseDoubleClicked(ImGuiMouseButton_Left) then
+            settings.is_open[1] = not settings.is_open[1];
+        end
+    end
     if (imgui.Begin('NomNom', settings.is_open, ImGuiWindowFlags_NoDecoration)) then
         imgui.Indent(100);imgui.TextColored(settings.text_color, 'Nom Nom !');
         imgui.Indent(-100);
