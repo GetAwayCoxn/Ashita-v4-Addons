@@ -1,6 +1,6 @@
 addon.name      = 'Runehelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.04';
+addon.version   = '1.05';
 addon.desc      = 'Does runefencer things.';
 addon.link      = 'https://github.com/GetAwayCoxn/Rune-Helper';
 
@@ -26,9 +26,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 
     local Area = AshitaCore:GetResourceManager():GetString("zones.names", AshitaCore:GetMemoryManager():GetParty():GetMemberZone(0));
     local Player = AshitaCore:GetMemoryManager():GetPlayer();
+    local MyStatus = AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0))
 
     -- Force Disabled under these conditions
-    if (Player:GetIsZoning() ~= 0) or (Area == nil) or (Towns:contains(Area)) or ((Player:GetMainJob() ~= 22) and (Player:GetSubJob() ~= 22)) or (AshitaCore:GetMemoryManager():GetParty():GetMemberHPPercent(0) < 1) then 
+    if (Player:GetIsZoning() ~= 0) or (Area == nil) or (Towns:contains(Area)) or ((Player:GetMainJob() ~= 22) and (Player:GetSubJob() ~= 22)) or (MyStatus == 2 or MyStatus == 3) then 
 		manager.enabled = 'Disabled';
 	end
 
@@ -37,8 +38,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         return;
     end
     now = os.time();
-    -- Do Work here if Enabled and before the is_open check
-    if (manager.enabled == 'Enabled') then
+    -- Do Work here if Enabled and not resting before the is_open check
+    if (manager.enabled == 'Enabled') and (MyStatus ~= 33) then
         --Set recasts, runes dont work correcty however due to recasts addon i think, every rune is Ignis? This works for our needs for now however
         local runerecast = CheckAbilityRecast('Rune Enchantment');
         local pulserecast = CheckAbilityRecast('Vivacious Pulse');
@@ -189,6 +190,16 @@ ashita.events.register('command', 'command_cb', function (e)
             manager.enabled = 'Disabled';
         elseif (manager.enabled == 'Disabled') then
             manager.enabled = 'Enabled';
+        end
+    elseif (#args >= 2 and args[2]:any('set')) then
+        local eles = {'fire','ice','wind','earth','thunder','water','light','dark'};
+        for x = 1, #eles do
+            for y = 1, #manager.menu_holders do
+                if args[y+2] == nil then
+                elseif string.lower(args[y+2]) == eles[x] then
+                    manager.menu_holders[y] = x - 1;
+                end
+            end
         end
     end
 end);
