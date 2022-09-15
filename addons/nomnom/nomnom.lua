@@ -1,6 +1,6 @@
 addon.name      = 'nomnom';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.05';
+addon.version   = '1.06';
 addon.desc      = 'Eats food.';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -12,7 +12,7 @@ local trytime = os.time();
 local now = os.time();
 local currentFood = '';
 local settings = T{
-    is_open = {false,},
+    is_open = {true,},
     size = {310,90},
     text_color = { 1.0, 0.75, 0.25, 1.0 },
     enabled = 'Disabled',
@@ -32,19 +32,18 @@ end);
 ashita.events.register('d3d_present', 'present_cb', function ()
     local area = AshitaCore:GetResourceManager():GetString("zones.names", AshitaCore:GetMemoryManager():GetParty():GetMemberZone(0));
     local player = AshitaCore:GetMemoryManager():GetPlayer();
-    local myIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
-	local myTarget = AshitaCore:GetMemoryManager():GetTarget():GetTargetIndex(myIndex);
-    local me = GetEntity(myIndex);
+    -- local myIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
+    -- local me = GetEntity(myIndex);
     local full = false;
     now = os.time();
 
     -- Force Disabled under these conditions
-    if (player:GetIsZoning() ~= 0) then 
+    if (player:GetIsZoning() ~= 0) then
 		settings.enabled = 'Disabled';
 	end
 
     -- Also force gui hide when zoning
-    if (player:GetIsZoning() ~= 0) or (me == nil) then
+    if (player:GetIsZoning() ~= 0) then
         return;
     end
     
@@ -57,20 +56,19 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			if (buffString ~= nil) and (buffString == 'Food') and not full then
                 full = true;
             end
-            if (buffString ~= nil) and ((buffString == 'Mounted') or (buffString == 'Weakness') or (buffString == 'Sleep') or (buffString == 'Charm') or (buffString == 'Terror') or (buffString == 'Paralysis') or (buffString == 'Stun') or (buffString == 'Petrification') or me.HPPercent <= 5) then
+            if (buffString ~= nil) and ((buffString == 'Mounted') or (buffString == 'Weakness') or (buffString == 'Sleep') or (buffString == 'Charm') or (buffString == 'Terror') or (buffString == 'Paralysis') or (buffString == 'Stun') or (buffString == 'Petrification')) then
                 return;
             end
         end
         --Kick out if no food selected on menu, else eat food since no Food buff found
         if settings.menu_holder[1] >= 0 and not full and settings.enabled == 'Enabled' then
-            if (settings.food[settings.menu_holder[1]+1][1]) ~= nil and (settings.food[settings.menu_holder[1]+1][1]) == currentFood and (settings.food[settings.menu_holder[1]+1][2]) > 0 then
-                if (now - trytime) > 5 then --and myTarget.IsPlayerMoving == 0 then
+            if (settings.food[settings.menu_holder[1]+2][1]) ~= nil and (settings.food[settings.menu_holder[1]+2][1]) == currentFood and (settings.food[settings.menu_holder[1]+2][2]) > 0 then
+                if (now - trytime) > 5 and AshitaCore:GetMemoryManager():GetTarget():GetIsPlayerMoving() == 0 then
                     AshitaCore:GetChatManager():QueueCommand(1, '/item "' .. currentFood .. '" <me>');
                     trytime = os.time()
                     settings.food = FindFood();
                 end
             else
-                --no food in Inv 
                 print(chat.header('NomNom'):append(chat.message('Yikes! No more ' .. currentFood)));
                 settings.enabled = 'Disabled';
             end
@@ -98,7 +96,9 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         end
         if (imgui.Combo(name, selection, settings.list)) then
             settings.menu_holder[1] = selection[1] - 1;
-            currentFood = settings.food[settings.menu_holder[1]+1][1];
+            if (settings.menu_holder[1] >= 0) then
+                currentFood = settings.food[settings.menu_holder[1] + 2][1];
+            end
         end
         imgui.Spacing();imgui.Spacing();
         if (imgui.Button(settings.update)) then
