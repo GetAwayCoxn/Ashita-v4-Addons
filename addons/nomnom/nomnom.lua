@@ -1,6 +1,6 @@
 addon.name      = 'nomnom';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.06';
+addon.version   = '1.07';
 addon.desc      = 'Eats food.';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -32,8 +32,6 @@ end);
 ashita.events.register('d3d_present', 'present_cb', function ()
     local area = AshitaCore:GetResourceManager():GetString("zones.names", AshitaCore:GetMemoryManager():GetParty():GetMemberZone(0));
     local player = AshitaCore:GetMemoryManager():GetPlayer();
-    -- local myIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
-    -- local me = GetEntity(myIndex);
     local full = false;
     now = os.time();
 
@@ -62,7 +60,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         end
         --Kick out if no food selected on menu, else eat food since no Food buff found
         if settings.menu_holder[1] >= 0 and not full and settings.enabled == 'Enabled' then
-            if (settings.food[settings.menu_holder[1]+2][1]) ~= nil and (settings.food[settings.menu_holder[1]+2][1]) == currentFood and (settings.food[settings.menu_holder[1]+2][2]) > 0 then
+            if (settings.food[settings.menu_holder[1]+1][1]) ~= nil and (settings.food[settings.menu_holder[1]+1][1]) == currentFood and (settings.food[settings.menu_holder[1]+1][2]) > 0 then
                 if (now - trytime) > 5 and AshitaCore:GetMemoryManager():GetTarget():GetIsPlayerMoving() == 0 then
                     AshitaCore:GetChatManager():QueueCommand(1, '/item "' .. currentFood .. '" <me>');
                     trytime = os.time()
@@ -97,7 +95,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         if (imgui.Combo(name, selection, settings.list)) then
             settings.menu_holder[1] = selection[1] - 1;
             if (settings.menu_holder[1] >= 0) then
-                currentFood = settings.food[settings.menu_holder[1] + 2][1];
+                currentFood = settings.food[settings.menu_holder[1] + 1][1];
             end
         end
         imgui.Spacing();imgui.Spacing();
@@ -135,17 +133,18 @@ function CountItemId(id)
     return total;
 end
 
-function CountItemName(str)--Might add cmd to add food by name
-    local total = 0;
-    str = tostring(str);
-    for i = 1, 81 do
-        local item = AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(0, i); --0 for actual inventory only
-        if (item ~= nil and item.Name[1] == str) then
-            total = total + item.Count;
-        end
-    end
-    return total;
-end
+-- function CountItemName(str)--Might add cmd to add food by name, this not working correctly atm, calling resource manager incorrectly probably
+--     local total = 0;
+--     str = tostring(str);
+--     local itm = AshitaCore:GetResourceManager():GetItemByName(str, 1)
+--     for i = 1, 81 do
+--         local item = AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(0, i); --0 for actual inventory only
+--         if (item ~= nil and item.Id == itm.Id) then
+--             total = total + item.Count;
+--         end
+--     end
+--     return total;
+-- end
 
 function FindFood()
     local foods = T{};
