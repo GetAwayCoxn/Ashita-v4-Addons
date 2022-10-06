@@ -45,7 +45,7 @@ function interface.RenderWeaponsTab()
                     interface.manager.DisplayRelics();
 
                     if (imgui.Button('Update Relics')) then
-                        print(chat.header(addon.name) .. chat.message('Updating Relics'));
+                        print(chat.header(addon.name) .. chat.message('Updating Relic Weapons'));
                         interface.manager.UpdateRelics();
                     end
                 imgui.EndTabItem();
@@ -56,25 +56,8 @@ function interface.RenderWeaponsTab()
                     interface.manager.DisplayMythics();
 
                     if (imgui.Button('Update Mythics')) then
-                        print(chat.header(addon.name) .. chat.message('Updated Mythics'));
+                        print(chat.header(addon.name) .. chat.message('Updated Mythic Weapons'));
                         interface.manager.UpdateMythics();
-                    end
-                imgui.EndTabItem();
-                end
-
-                if (imgui.BeginTabItem('ERGONS', nil)) then
-                    imgui.Spacing();
-                    
-                    interface.manager.DisplayErgons();
-
-                    imgui.Spacing();imgui.Spacing();
-                    imgui.BeginTable('ergon needed table', 5, ImGuiTableFlags_Borders);
-                        interface.manager.DisplayErgonsNeed()
-                    imgui.EndTable();
-
-                    if (imgui.Button('Update Ergons')) then
-                        print(chat.header(addon.name) .. chat.message('Updated Ergon Weapons'));
-                        interface.manager.UpdateErgons();
                     end
                 imgui.EndTabItem();
                 end
@@ -89,8 +72,19 @@ function interface.RenderWeaponsTab()
                     interface.manager.DisplayEmpyreanNeeds();
 
                     if (imgui.Button('Update Empyreans')) then
-                        print(chat.header(addon.name) .. chat.message('Updated Empyreans'));
+                        print(chat.header(addon.name) .. chat.message('Updated Empyrean Weapons'));
                         interface.manager.UpdateEmpyreans();
+                    end
+                imgui.EndTabItem();
+                end
+
+                if (imgui.BeginTabItem('ERGONS', nil)) then
+                    
+                    interface.manager.DisplayErgons();
+
+                    if (imgui.Button('Update Ergons')) then
+                        print(chat.header(addon.name) .. chat.message('Updated Ergon Weapons'));
+                        interface.manager.UpdateErgons();
                     end
                 imgui.EndTabItem();
                 end
@@ -117,6 +111,7 @@ function interface.RenderWeaponsTab()
 
         if (imgui.Button('Update All Weapons')) then
             interface.manager.UpdateWeapons();
+            print(chat.header(addon.name) .. chat.message('Updated All Weapons'));
         end
     imgui.EndGroup();
 end

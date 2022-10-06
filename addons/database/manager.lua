@@ -320,7 +320,43 @@ function manager.DisplayRelics()
             imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.relicsneeds[a])));
         end
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Est. Gils:');
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Byne Bills'][1] * interface.data.progress.weapons.relicsneeds[1])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Bronze Pieces'][1] * interface.data.progress.weapons.relicsneeds[2])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['T. Whiteshells'][1] * interface.data.progress.weapons.relicsneeds[3])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Umbral Marrow'][1] * interface.data.progress.weapons.relicsneeds[4])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Pluton'][1] * interface.data.progress.weapons.relicsneeds[5])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.relicsneeds[6])));
     imgui.EndTable();
+
+    imgui.Spacing();imgui.Spacing();
+    imgui.TextColored(interface.colors.header, 'Current Weapon Remaining Items (not currency):');
+    imgui.Spacing();imgui.Spacing();
+
+    imgui.InputInt(interface.data.current['Relic'][1] .. ' Pluton', interface.data.current['Pluton']);imgui.SameLine();
+    if (interface.data.current['Pluton'][1] < 0) then
+        interface.data.current['Pluton'][1] =  0;
+    elseif (interface.data.current['Pluton'][1] > 10000) then
+        interface.data.current['Pluton'][1] = 10000;
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Pluton'][1] * interface.data.current['Pluton'][1])));
+
+    interface.data.current['Temp Sads'][1] = interface.data.current['Sad. Crystals'][1];--[1] for relics
+    imgui.InputInt('Sad. Crystals', interface.data.current['Temp Sads']);imgui.SameLine();
+    if (interface.data.current['Temp Sads'][1] < 0) then
+        interface.data.current['Sad. Crystals'][1] =  0;
+    elseif (interface.data.current['Temp Sads'][1] > 596) then
+        interface.data.current['Sad. Crystals'][1] = 596;
+    else
+        interface.data.current['Sad. Crystals'][1] = interface.data.current['Temp Sads'][1];
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][1])));
+
+    imgui.Spacing();
+    imgui.TextColored(interface.colors.header, 'Total Gil Est: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Pluton'][1] * interface.data.current['Pluton'][1] + interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][1])));
+    imgui.Spacing();
 end
 
 function manager.UpdateEmpyreans()
@@ -518,6 +554,8 @@ function manager.DisplayEmpyreanNeeds()
     imgui.Spacing();imgui.Spacing();
     imgui.TextColored(interface.colors.header, 'Sad Crystals Needed: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.empyreansneeds[25])));
+    imgui.TextColored(interface.colors.header, 'Est. Gil Needed: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.empyreansneeds[25])));
     imgui.Spacing();imgui.Spacing();
 end
 
@@ -571,7 +609,12 @@ function manager.UpdateMythics()
 end
 
 function manager.DisplayMythics()
-    imgui.Spacing();
+    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
+        AshitaCore:GetPacketManager():AddOutgoingPacket(0x10F, { 0x00, 0x00, 0x00, 0x00 });--update currency1
+        -- print('Currency Test')
+        check = false;
+    end
+    --imgui.Spacing();
     imgui.BeginTable('mythics table', 10, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
@@ -618,7 +661,7 @@ function manager.DisplayMythics()
     end
     imgui.EndTable();
 
-    imgui.Spacing();imgui.Spacing();
+    --imgui.Spacing();imgui.Spacing();
     imgui.BeginTable('mythic needed table', 5, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Mythic Need:');
@@ -632,11 +675,65 @@ function manager.DisplayMythics()
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[3])));
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[4])));
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Est. Gils:');
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Mulcibar\'s Scoria'][1])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.progress.weapons.mythicsneeds[1])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Mulcibar\'s Scoria'][1] * interface.data.progress.weapons.mythicsneeds[2])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.progress.weapons.mythicsneeds[3])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.mythicsneeds[4])));
     imgui.EndTable();
+
+    --imgui.Spacing();
+    imgui.TextColored(interface.colors.header, 'Current Weapon Remaining Items:');
+    imgui.TextColored(interface.colors.header, 'Tokens: ');imgui.SameLine();imgui.Text(interface.manager.comma_value(interface.data.current['Tokens'][1]));imgui.SameLine();
+    imgui.Text('(Est. Runs:');imgui.SameLine();
+    if (interface.data.current['Tokens'][1] < 150000) then
+        imgui.Text(tostring(tonumber(('%2i'):fmt(interface.data.current['Tokens'][1]/2000)) .. ')'));imgui.SameLine();
+    else
+        imgui.Text('0)');imgui.SameLine();
+    end
+    imgui.TextColored(interface.colors.header, '     Ichor: ')imgui.SameLine();imgui.Text(interface.manager.comma_value(interface.data.current['Ichor'][1]));imgui.SameLine();
+    imgui.Text('(Est. Runs:');imgui.SameLine();
+    if (interface.data.current['Ichor'][1] < 100000) then
+        imgui.Text(tostring(tonumber(('%2i'):fmt(interface.data.current['Ichor'][1]/1920)) .. ')'));imgui.SameLine();
+    else
+        imgui.Text('0)');imgui.SameLine();
+    end
+    
+    imgui.Spacing();
+
+    imgui.InputInt(--[[interface.data.current['Mythic'][1] .. ]]'Traded Alexandrite', interface.data.current['Alexandrite']);imgui.SameLine();
+    if (interface.data.current['Alexandrite'][1] < 0) then
+        interface.data.current['Alexandrite'][1] =  0;
+    elseif (interface.data.current['Alexandrite'][1] > 30000) then
+        interface.data.current['Alexandrite'][1] = 30000;
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.current['Alexandrite'][1])));
+    
+    imgui.InputInt(interface.data.current['Mythic'][2] .. ' Beitetsu', interface.data.current['Beitetsu']);imgui.SameLine();
+    if (interface.data.current['Beitetsu'][1] < 0) then
+        interface.data.current['Beitetsu'][1] =  0;
+    elseif (interface.data.current['Beitetsu'][1] > 10000) then
+        interface.data.current['Beitetsu'][1] = 10000;
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][1])));
+
+    interface.data.current['Temp Sads'][1] = interface.data.current['Sad. Crystals'][2];--[2] for mythics
+    imgui.InputInt('Sad. Crystals', interface.data.current['Temp Sads']);imgui.SameLine();
+    if (interface.data.current['Temp Sads'][1] < 0) then
+        interface.data.current['Sad. Crystals'][2] =  0;
+    elseif (interface.data.current['Temp Sads'][1] > 596) then
+        interface.data.current['Sad. Crystals'][2] = 596;
+    else
+        interface.data.current['Sad. Crystals'][2] = interface.data.current['Temp Sads'][1];
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][2])));
+
+    imgui.Spacing();
+    imgui.TextColored(interface.colors.header, 'Total Gil Est: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.current['Alexandrite'][1] + interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][1] + interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][1])));
+    imgui.Spacing();
 end
 
 function manager.UpdateErgons()
@@ -697,6 +794,12 @@ function manager.UpdateErgons()
 end
 
 function manager.DisplayErgons()
+    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
+        AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2
+        -- print('Currency Test')
+        check = false;
+    end
+
     imgui.Spacing();imgui.Spacing();imgui.Spacing();imgui.Spacing();imgui.Spacing();
     imgui.BeginTable('ergon table', #interface.defaults.weapons.ergons[1], ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);
@@ -737,21 +840,68 @@ function manager.DisplayErgons()
         end
     end
     imgui.EndTable();
-end
 
-function manager.DisplayErgonsNeed()
-    imgui.TableNextRow(ImGuiTableRowFlags_Headers);
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Ergon Need:');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'HP Bayld');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Plasm');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Beitetsu');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Sad Crystals');
-    imgui.TableNextColumn();
-    imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.ergonNeeds[1]));
-    imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.ergonNeeds[2]));
-    imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.ergonNeeds[3]));
-    imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.ergonNeeds[4]));
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Est. Gils:');
+    imgui.Spacing();imgui.Spacing();
+    imgui.BeginTable('ergon needed table', 5, ImGuiTableFlags_Borders);
+        imgui.TableNextRow(ImGuiTableRowFlags_Headers);
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Ergon Need:');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Plasm');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'HP Bayld');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Beitetsu');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Sad Crystals');
+        imgui.TableNextColumn();
+        imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.ergonNeeds[1]));
+        imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.ergonNeeds[2]));
+        imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.ergonNeeds[3]));
+        imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.ergonNeeds[4]));
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Est. Gils:');
+        imgui.TableNextColumn();imgui.Text('Current: ' .. manager.comma_value(interface.data.current['Plasm'][1]));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['H-P Bayld'][1] * interface.data.progress.weapons.ergonNeeds[1])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.progress.weapons.ergonNeeds[3])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.ergonNeeds[4])));
+    imgui.EndTable();
+
+    imgui.Spacing();
+    imgui.TextColored(interface.colors.header, 'Current Weapon Remaining Items:');
+    imgui.Spacing();
+
+    imgui.InputInt(--[[interface.data.current['H-P Bayld'][1] .. ]]'Traded H-P Bayld', interface.data.current['H-P Bayld']);imgui.SameLine();
+    if (interface.data.current['H-P Bayld'][1] < 0) then
+        interface.data.current['H-P Bayld'][1] =  0;
+    elseif (interface.data.current['H-P Bayld'][1] > 30000) then
+        interface.data.current['H-P Bayld'][1] = 30000;
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['H-P Bayld'][1] * interface.data.current['H-P Bayld'][1])));
+    
+    interface.data.current['Temp Beit'][1] = interface.data.current['Beitetsu'][2];--[2] for ergons
+    imgui.InputInt(interface.data.current['Ergon'][1] .. ' Beitetsu', interface.data.current['Temp Beit']);imgui.SameLine();
+    if (interface.data.current['Temp Beit'][1] < 0) then
+        interface.data.current['Beitetsu'][2] =  0;
+    elseif (interface.data.current['Temp Beit'][1] > 10000) then
+        interface.data.current['Beitetsu'][2] = 10000;
+    else
+        interface.data.current['Beitetsu'][2] = interface.data.current['Temp Beit'][1];
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][2])));
+
+    interface.data.current['Temp Sads'][1] = interface.data.current['Sad. Crystals'][4];--[4] for ergons
+    imgui.InputInt('Sad. Crystals', interface.data.current['Temp Sads']);imgui.SameLine();
+    if (interface.data.current['Temp Sads'][1] < 0) then
+        interface.data.current['Sad. Crystals'][4] =  0;
+    elseif (interface.data.current['Temp Sads'][1] > 596) then
+        interface.data.current['Sad. Crystals'][4] = 596;
+    else
+        interface.data.current['Sad. Crystals'][4] = interface.data.current['Temp Sads'][1];
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][4])));
+
+    imgui.Spacing();
+    imgui.TextColored(interface.colors.header, 'Total Gil Est: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['H-P Bayld'][1] * interface.data.current['H-P Bayld'][1] + interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][2] + interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][4])));
+    imgui.Spacing();
 end
 
 function manager.UpdateAmbuWeps()
@@ -1482,6 +1632,11 @@ function manager.CountRelicGear()
 end
 
 function manager.DisplayRelicGear()
+    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
+        AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2
+        -- print('Currency Test')
+        check = false;
+    end
     imgui.BeginTable('relic gear has', 5, ImGuiTableFlags_Borders);
     for a = 1, #interface.data.progress.gear.relic do
         for b = 1, #interface.data.progress.gear.relic[a] do
@@ -1719,11 +1874,12 @@ function manager.DisplayRelicGearNeed()
 
     imgui.Spacing();
     imgui.Text('Est. Needed Gil for Guild Items:  ');imgui.SameLine();imgui.TextColored(interface.colors.header, manager.comma_value(manager.guilditemsgil));
-    imgui.Text('Est. Needed Plasm:  ');imgui.SameLine();imgui.TextColored(interface.colors.header, manager.comma_value(manager.plasm));
+    imgui.Text('Est. Needed Plasm:  ');imgui.SameLine();imgui.TextColored(interface.colors.header, manager.comma_value(manager.plasm));imgui.SameLine();
+    imgui.Text('(curr: ' .. manager.comma_value(interface.data.current['Plasm'][1]) .. ')')
 
     imgui.Spacing();
     if (imgui.Button('Update Relic Gear')) then
-        print(chat.header(addon.name) .. chat.message('Updating ... '));
+        print(chat.header(addon.name) .. chat.message('Updated Relic Gear'));
         manager.UpdateRelicGear();
     end
     imgui.ShowHelp('119+2 and +3 items also need various shards and voids, see the next tab for display of those needs');
@@ -1783,7 +1939,7 @@ function manager.DisplayRelicShardsNeed()
     imgui.Text('Needed Kindred\'s Medals:  ' .. km);
 
     if (imgui.Button('Update Relic Gear')) then
-        print(chat.header(addon.name) .. chat.message('Updating ... '));
+        print(chat.header(addon.name) .. chat.message('Updated Relic Gear'));
         manager.UpdateRelicGear();
     end
 end
@@ -2035,7 +2191,7 @@ function manager.DisplayEmpyGear()
     end
     imgui.EndTable();
     if (imgui.Button('Update Empy Gear')) then
-        print(chat.header(addon.name) .. chat.message('Updating ... '));
+        print(chat.header(addon.name) .. chat.message('Updated Empyrean Gear'));
         interface.manager.UpdateEmpyGear();
     end
     imgui.SameLine();
@@ -2172,7 +2328,7 @@ function manager.DisplayEmpyBaseGearNeed()
         end
     imgui.EndTable();
     if (imgui.Button('Update Empy Gear')) then
-        print(chat.header(addon.name) .. chat.message('Updating ... '));
+        print(chat.header(addon.name) .. chat.message('Updated Empyrean Gear'));
         interface.manager.UpdateEmpyGear();
     end
 end
@@ -2304,7 +2460,7 @@ function manager.DisplayEmpyReforgedGearNeed()
         end
     imgui.EndTable();
     if (imgui.Button('Update Empy Gear')) then
-        print(chat.header(addon.name) .. chat.message('Updating ... '));
+        print(chat.header(addon.name) .. chat.message('Updated Empyrean Gear'));
         interface.manager.UpdateEmpyGear();
     end
 end
@@ -2579,6 +2735,7 @@ function manager.DisplayScaleGear()
         end
     imgui.EndGroup();
     if (imgui.Button('Update Scale Gear')) then
+        print(chat.header(addon.name) .. chat.message('Updated Scale Gear'));
         manager.UpdateScaleGear();
     end
 end
@@ -2754,6 +2911,7 @@ function manager.DisplayHideGear()
         end
     imgui.EndGroup();
     if (imgui.Button('Update Hide Gear')) then
+        print(chat.header(addon.name) .. chat.message('Updated Hide Gear'));
         manager.UpdateHideGear();
     end
 end
@@ -2929,6 +3087,7 @@ function manager.DisplayWingGear()
         end
     imgui.EndGroup();
     if (imgui.Button('Update Wing Gear')) then
+        print(chat.header(addon.name) .. chat.message('Updated Wing Gear'));
         manager.UpdateWingGear();
     end
 end
@@ -3421,13 +3580,91 @@ function manager.ResetAMBU()
     delay:once(3);--add delay to give time for weapons to update to correctly display/not display needed weapon upgrade items
 end
 
+function manager.HandleOboro(e)
+    local words = e.message:args();
+    if (not e.injected) and (string.match(e.message, 'You\'ve given me ')) then
+        if (words[12] == 'Another') then 
+            local chars = words[20]:split("")--Need to account for multi names here, Death Penalty for example
+            local weaponArr = {}
+            local weapon = ''
+            for x=1, #chars do
+                if string.match(chars[x], "%a") then--or string.match(chars[x], "%s") then
+                    weaponArr[#weaponArr +1] = chars[x]
+                end
+            end
+            
+            for y = 1, #weaponArr do
+                weapon = weapon .. weaponArr[y]
+            end
+            -- print(chat.header(addon.name) .. chat.message(words[9]));
+
+            local found = false
+            
+            for w = 1, #interface.defaults.ergons do
+                if interface.defaults.ergons[w] == weapon then
+                    interface.data.current['Ergon'][1] = weapon
+                    interface.data.current['Beitetsu'][2] = tonumber(words[13])--rocks remaining [2] for ergon
+                    found = true
+                end
+            end
+
+            if found == false then
+                for w = 1, #interface.defaults.relics do
+                    if interface.defaults.relics[w] == weapon then
+                        interface.data.current['Relic'][1] = weapon
+                        interface.data.current['Pluton'][1] = tonumber(words[13])--rocks remaining
+                        found = true
+                    end
+                end
+            end
+            if found == false then
+                for w = 1, #interface.defaults.mythics do
+                    if interface.defaults.mythics[w] == weapon then
+                        interface.data.current['Mythic'][2] = weapon -- [2] for oboro mythic, [1] is paparoon mythic
+                        interface.data.current['Beitetsu'][1] = tonumber(words[13])--rocks remaining
+                        found = true
+                    end
+                end
+            end
+            if found == false then
+                for w = 1, #interface.defaults.empyreans do
+                    if interface.defaults.empyreans[w] == weapon then
+                        interface.data.current['Empyrean'][1] = weapon
+                        interface.data.current['Riftborn Boulder'][1] = tonumber(words[13]) --Need to add offset for empy rocks remaining
+                        found = true
+                    end
+                end
+            end
+        end
+    end
+    
+end
+
+function manager.HandlePaparoon(e)
+    local words = e.message:args();
+    if (not e.injected) and (string.match(e.message, 'Yooo find Paparoon ')) then
+        if (words[7] == 'more') then
+            interface.data.current['Alexandrite'][1] = tonumber(words[6])
+        end
+    end
+end
+
+function manager.PacketInCurrency(e)
+    interface.data.current['Tokens'][1] = struct.unpack("I", e.data, 0x94)/256;
+    interface.data.current['Ichor'][1] = struct.unpack("I", e.data, 0xA0)/256;
+end
+
+function manager.PacketInCurrency2(e)
+    interface.data.current['Plasm'][1] = struct.unpack("I", e.data, 0x14)/256;
+end
+
 function manager.comma_value(n) --credit--http://richard.warburton.it
 	local left,num,right = string.match(n,'^([^%d]*%d)(%d*)(.-)$')
 	return left..(num:reverse():gsub('(%d%d%d)','%1,'):reverse())..right
 end
 
 function manager.Test()
-    --print(tostring(manager.CheckItemRankInfo(18573)));
+    print(tostring(manager.CheckItemRankInfo(18573)));
 end
 
 return manager;

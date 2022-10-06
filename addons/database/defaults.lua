@@ -1,5 +1,9 @@
 defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
     jobsabrv = {'WAR','MNK','WHM','BLM','RDM','THF','PLD','DRK','BST','BRD','RNG','SAM','NIN','DRG','SMN','BLU','COR','PUP','DNC','SCH','GEO','RUN'}, --for easier reference is all
+    relics = {},
+    mythics = {'Conqueror','Glanzfaust','Yagrush','Laevateinn','Murgleis','Vajra','Burtgang','Liberator','Aymur','Carnwenhan','Gastraphetes','Kogarasumaru','Nagi','Ryunohige','Nirvana','Tizona','Death Penalty','Kenkonken','Terpsichore','Tupsimati'},
+    empyreans = {},
+    ergons = {'Epeolatry','Idris'},
     jobs = {
     },
 
