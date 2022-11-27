@@ -16,7 +16,7 @@ Ashita v4 addon for FFXI to track TH levels on mobs.
 
 -Will change display of each mob to green if your on THF main and it see's an actual TH+ chat log message
 
--This reads from the chat log so you still have to have your white damage visible for this to work
+-This reads from the chat log so you still have to have your damage visible in the log for this to work
 
 -Will currently recognize any melee hits or ranged attacks to establish first TH/claim, and of course TH procs after that on THF main, so if you are running around on BLU/THF subductioning stuff in TH gear this will not currently recognize your TH4 on everything
 
