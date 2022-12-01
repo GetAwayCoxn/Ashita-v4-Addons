@@ -1,5 +1,5 @@
 local modifind = require('modifind');
-local manager = T{ -- functions for data management
+local manager = T{
     nuggets = true;
     gems = true;
     animas = true;
@@ -7,10 +7,11 @@ local manager = T{ -- functions for data management
     guilditemsgil = 0;
     plasm = 0;
     pointsmap = {50, 80, 120, 170, 220, 280, 340, 410, 480, 560, 650, 750, 860, 980};
-    expmap = {2500,5550,8721,11919,15122,18327,21532,24737,27942,31147,41205,48130,53677,58618,63292,67848,72353,76835,81307,85775,109112,127014,141329,153277,163663,173018,181692,189917,197845,205578,258409,307400,353012,395691,435673,473392,509085,542995,575336,606296,769426};
+    expmap = {2500,5550,8721,11919,15122,18327,21532,24737,27942,31147,41205,48130,53677,58618,63292,67848,72353,76835,81307,85775,109112,127014,141329,153277,163663,173018,181692,189917,197845,205578,258409,307400,353012,395691,435673,473392,509085,542995,575336,606296,769426,951369,1154006,1379407,1629848,1907833,2216116,2557728,2936001,3354601,3817561};
+    jobs = {};
 };
 
-function manager.UpdateJobs()  
+function manager.UpdateJobs()
     local player = AshitaCore:GetMemoryManager():GetPlayer();
     local jobleveltotal = 0.0;
     local JPspenttotal = 0.0;
@@ -24,7 +25,7 @@ function manager.UpdateJobs()
         for x = 1, #manager.expmap do
             masterexptotal = masterexptotal + manager.expmap[x];
         end
-        interface.defaults.jobs[n] = {player:GetJobLevel(n),player:GetJobPointsSpent(n),mLV,player:GetJobPoints(n)};
+        manager.jobs[n] = {player:GetJobLevel(n),player:GetJobPointsSpent(n),mLV,player:GetJobPoints(n)};
         jobleveltotal = jobleveltotal + player:GetJobLevel(n);
         JPspenttotal = JPspenttotal + player:GetJobPointsSpent(n);
         for l = mLV, 1, -1 do
@@ -47,140 +48,35 @@ function manager.DisplayJobs()
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Master Level');
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Job Points Current');
 
-    for n=1, #interface.defaults.jobsabrv do
-        imgui.TableNextRow();imgui.TableNextColumn();imgui.TextColored(interface.colors.header, interface.defaults.jobsabrv[n]);
-        for x = 1, 4 do 
-            local t = T{};
-            imgui.TableNextColumn();
-            if (interface.defaults.jobs[n] ~= nil) then
-                t:merge(interface.defaults.jobs[n], true);
-                if ((x == 1) and (t[x] == 99)) or ((x == 2) and (t[x] == 2100)) or ((x == 3) and (t[x] == 40)) or ((x == 4) and (t[x] == 500)) then
-                    imgui.TextColored(interface.colors.text1, tostring(t[x]));
+        for n=1, #interface.defaults.jobsabrv do
+            imgui.TableNextRow();imgui.TableNextColumn();imgui.TextColored(interface.colors.header, interface.defaults.jobsabrv[n]);
+            for x = 1, 4 do 
+                local t = T{};
+                imgui.TableNextColumn();
+                if (manager.jobs[n] ~= nil) then
+                    t:merge(manager.jobs[n], true);
+                    if ((x == 1) and (t[x] == 99)) or ((x == 2) and (t[x] == 2100)) or ((x == 3) and (t[x] == 50)) or ((x == 4) and (t[x] == 500)) then
+                        imgui.TextColored(interface.colors.green, tostring(t[x]));
+                    else
+                        imgui.Text(tostring(t[x]));
+                    end
+                    
                 else
-                    imgui.Text(tostring(t[x]));
+                    imgui.Text('0');
                 end
-                
-            else
-                imgui.Text('0');
             end
         end
-    end
     imgui.EndTable();
-
-    imgui.Separator();imgui.Spacing();
-    imgui.BeginTable('totals table', 1);
-        imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();
-        imgui.TextColored(interface.colors.header, 'TOTALS');imgui.TableNextColumn();
-        imgui.TextColored(interface.colors.text1, 'Total JOB Level Completion:');imgui.TableNextColumn();
-        imgui.ProgressBar(interface.data.progress.jobs[1], 10);imgui.TableNextColumn();
-        imgui.TextColored(interface.colors.text1, 'Total JOB Points Completion:');imgui.TableNextColumn();
-        imgui.ProgressBar(interface.data.progress.jobs[2], 10);imgui.TableNextColumn();
-        imgui.TextColored(interface.colors.text1, 'Total JOB Master Level Completion:');imgui.TableNextColumn();
-        imgui.ProgressBar(interface.data.progress.jobs[3], 100);imgui.TableNextColumn(); 
-    imgui.EndTable();
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
+    imgui.TextColored(interface.colors.green, 'Total JOB Level Completion:');
+    imgui.ProgressBar(interface.data.progress.jobs[1], 10);imgui.NewLine();
+    imgui.TextColored(interface.colors.green, 'Total JOB Points Completion:');
+    imgui.ProgressBar(interface.data.progress.jobs[2], 10);imgui.NewLine();
+    imgui.TextColored(interface.colors.green, 'Total JOB Master Level Completion:');
+    imgui.ProgressBar(interface.data.progress.jobs[3], 100);imgui.NewLine();
     if (imgui.Button('Update Jobs')) then
         print(chat.header(addon.name) .. chat.message('Updated Jobs'));
         manager.UpdateJobs();
-    end
-end
-
-function manager.CheckItemId(id)
-    local total = 0;
-
-    for x = 0, 16 do
-        for y = 0, AshitaCore:GetMemoryManager():GetInventory():GetContainerCountMax(x) do
-            local item = AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(x, y);
-            if (item ~= nil and item.Id == id) then
-                total = total + item.Count;
-            end
-        end
-    end
-    if total ~= 0 then return true;
-    else return false end
-end
-
-function manager.CheckItemName(name)
-    local total = 0;
-    local tempitem = AshitaCore:GetResourceManager():GetItemByName(name, 0);
-    if tempitem == nil then return end
-
-    for x = 0, 16 do
-        for y = 0, AshitaCore:GetMemoryManager():GetInventory():GetContainerCountMax(x) do
-            local item = AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(x, y);
-            if (item ~= nil and tempitem ~= nil and item.Id == tempitem.Id) then
-                total = total + item.Count;
-            end
-        end
-    end
-    if total ~= 0 then return true;
-    else return false end
-end
-
-function manager.CountItemId(id)
-    local total = 0;
-    for x = 0, 16 do
-        for y = 0, AshitaCore:GetMemoryManager():GetInventory():GetContainerCountMax(x) do
-            local item = AshitaCore:GetMemoryManager():GetInventory():GetContainerItem(x, y);
-            if (item ~= nil and item.Id == id) then
-                total = total + item.Count;
-            end
-        end
-    end
-    return total;
-end
-
-function manager.CheckItemRankInfo(id)
-    local inv = AshitaCore:GetMemoryManager():GetInventory();
-    for bag = 0,16 do
-        for slot = 1,80 do
-            local item = inv:GetContainerItem(bag, slot);
-            if item and item.Id == id then
-                if id == 16191 or id == 18573 then--empy shield/harp early stages
-                    local extData = item.Extra;
-                    local augType = struct.unpack('B', extData, 1);
-                    if augType == 0 then
-                        return false;
-                    else
-                        return true;
-                    end
-                else
-                    local extData = item.Extra;
-                    local augType = struct.unpack('B', extData, 1);
-                    if (augType == 2) or (augType == 3) then
-                        local augFlag = struct.unpack('B', extData, 2);
-                        --print(tostring(augFlag));
-                        if (augFlag == 131) then
-                            local rankByte = struct.unpack('B', extData, 7);
-                            local rank = ((rankByte % 128) - (rankByte % 4)) / 4;
-                            return rank;
-                        elseif augFlag%64/32 >=1 then
-                            local path_map = {[0] = 'A',[1] = 'B', [2] = 'C', [3] = 'D'}
-                            local path = path_map[extData:byte(3)%4];
-                            --print(tostring(path));
-                        end
-                    end
-                end
-                return 0;
-            end
-        end
-    end
-    return 0;
-end
-
-function manager.CheckKeyItemName(name)
-    local player = AshitaCore:GetMemoryManager():GetPlayer();
-
-    for x = 0, 65535 do
-        local n = AshitaCore:GetResourceManager():GetString('keyitems.names', x);
-        if (n ~= nil and n:len() > 1) then
-            if (n:lower():match(name:lower())) then
-                if player:HasKeyItem(x) == true then
-                    return true;
-                else
-                    return false;
-                end
-            end
-        end
     end
 end
 
@@ -190,53 +86,56 @@ function manager.UpdateRelics()
     local itemcountsIDsHundos = {1456,1453,1450};
     local itemcountsIDsThousands = {1457,1454,1451};
 
-    for w = 1, #interface.defaults.weapons.relics do
-        for i = #interface.defaults.weapons.relics[w],1,-1 do
-            if (manager.CheckItemId(interface.defaults.weapons.relics[w][i])) then
-                if (i == #interface.defaults.weapons.relics[w]) then
-                    interface.data.progress.weapons.relics[w][3] = manager.CheckItemRankInfo(interface.defaults.weapons.relics[w][i]);
-                    interface.data.progress.weapons.relics[w][2] = i;
-                    break;
+    for weapon = 1, #interface.defaults.weapons.relics do
+        -- for stage = #interface.defaults.weapons.relics[weapon],1,-1 do
+            local stage = modifind.searchIdTable(interface.defaults.weapons.relics[weapon]:reverse());
+            if (stage) then
+            -- if (modifind.searchId(interface.defaults.weapons.relics[weapon][stage])) then
+                if (stage == #interface.defaults.weapons.relics[weapon]) then
+                    interface.data.progress.weapons.relics[weapon][3] = modifind.checkItemRankInfo(interface.defaults.weapons.relics[weapon][stage]);
+                    interface.data.progress.weapons.relics[weapon][2] = stage;
+                    -- break;
                 else
-                    interface.data.progress.weapons.relics[w][2] = i;
-                    for x = i + 1, #interface.defaults.weapons.relics[w] do
+                    interface.data.progress.weapons.relics[weapon][2] = stage;
+                    for x = stage + 1, #interface.defaults.weapons.relics[weapon] do
                         for c = 1, #itemcounts do
-                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.relicsreq[x][w][c];
+                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.relicsreq[x][weapon][c];
                         end
                     end
-                    break;
+                    -- break;
                 end
-            elseif (i == 1) and (manager.CheckItemId(interface.defaults.weapons.relics[w][i]) == false) then
-                for x = 1, #interface.defaults.weapons.relics[w] do
+            else
+            -- elseif (stage == 1) and (modifind.searchId(interface.defaults.weapons.relics[weapon][stage]) == false) then
+                for x = 1, #interface.defaults.weapons.relics[weapon] do
                     for c = 1, #itemcounts do
-                        itemcounts[c] = itemcounts[c] + interface.defaults.weapons.relicsreq[x][w][c];
+                        itemcounts[c] = itemcounts[c] + interface.defaults.weapons.relicsreq[x][weapon][c];
                     end
                 end
             end
-        end
+        -- end
     end
 
     for c = 1, #itemcounts do
-        interface.data.progress.weapons.relicsneeds[c] = itemcounts[c] - manager.CountItemId(itemcountsIDs[c]);
+        interface.data.progress.weapons.relicsneeds[c] = itemcounts[c] - modifind.countItemId(itemcountsIDs[c]);
         if c <= 3 then
-            interface.data.progress.weapons.relicsneeds[c] = interface.data.progress.weapons.relicsneeds[c] - 100*manager.CountItemId(itemcountsIDsHundos[c]);
-            interface.data.progress.weapons.relicsneeds[c] = interface.data.progress.weapons.relicsneeds[c] - 10000*manager.CountItemId(itemcountsIDsThousands[c]);
+            interface.data.progress.weapons.relicsneeds[c] = interface.data.progress.weapons.relicsneeds[c] - 100*modifind.countItemId(itemcountsIDsHundos[c]);
+            interface.data.progress.weapons.relicsneeds[c] = interface.data.progress.weapons.relicsneeds[c] - 10000*modifind.countItemId(itemcountsIDsThousands[c]);
         end
     end
 
     local points = 0;
-    for w = 1, #interface.data.progress.weapons.relics do
-        if interface.data.progress.weapons.relics[w][3] == 0 then
-            for i = interface.data.progress.weapons.relics[w][3] + 1, #manager.pointsmap do
-                points = points + manager.pointsmap[i];
+    for weapon = 1, #interface.data.progress.weapons.relics do
+        if interface.data.progress.weapons.relics[weapon][3] == 0 then
+            for stage = interface.data.progress.weapons.relics[weapon][3] + 1, #manager.pointsmap do
+                points = points + manager.pointsmap[stage];
             end
         else
-            for i = interface.data.progress.weapons.relics[w][3], #manager.pointsmap do
-                points = points + manager.pointsmap[i];
+            for stage = interface.data.progress.weapons.relics[weapon][3], #manager.pointsmap do
+                points = points + manager.pointsmap[stage];
             end
         end
     end
-    interface.data.progress.weapons.relicsneeds[6] = (points / 10) - manager.CountItemId(itemcountsIDs[9875]);
+    interface.data.progress.weapons.relicsneeds[6] = (points / 10) - modifind.countItemId(9875);
 end
 
 function manager.DisplayRelics()
@@ -277,7 +176,7 @@ function manager.DisplayRelics()
                     imgui.TextColored(interface.colors.header, interface.data.progress.weapons.relics[w][1]);
                     imgui.TableNextColumn();
                     if interface.data.progress.weapons.relics[w][2] >= i then
-                        imgui.TextColored(interface.colors.text1,'Yup');
+                        imgui.TextColored(interface.colors.green,'Yup');
                     else
                         imgui.TextColored(interface.colors.error,'Nupe');
                     end
@@ -286,14 +185,14 @@ function manager.DisplayRelics()
                 elseif i <= 9 then
                     imgui.TableNextColumn();
                     if interface.data.progress.weapons.relics[w][2] >= i then
-                        imgui.TextColored(interface.colors.text1,'Yup');
+                        imgui.TextColored(interface.colors.green,'Yup');
                     else
                         imgui.TextColored(interface.colors.error,'Nupe');
                     end
                 else
                     imgui.TableNextColumn();
                     if interface.data.progress.weapons.relics[w][3] == 15 then
-                        imgui.TextColored(interface.colors.text1, '15');
+                        imgui.TextColored(interface.colors.green, '15');
                     elseif interface.data.progress.weapons.relics[w][3] > 0 then
                         imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.weapons.relics[w][3]));
                     else
@@ -303,9 +202,7 @@ function manager.DisplayRelics()
             end
         end
     imgui.EndTable();
-                    
-
-    imgui.Spacing();imgui.Spacing();
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
     imgui.BeginTable('relic needed table', 7, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Relic Need:');
@@ -327,12 +224,9 @@ function manager.DisplayRelics()
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Pluton'][1] * interface.data.progress.weapons.relicsneeds[5])));
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.relicsneeds[6])));
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Spacing();
+    imgui.NewLine();imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'Current Weapon Remaining Items (not currency):');
-    imgui.Spacing();imgui.Spacing();
-
-    imgui.InputInt(interface.data.current['Relic'][1] .. ' Pluton', interface.data.current['Pluton']);imgui.SameLine();
+    imgui.InputInt(--[[interface.data.current['Relic'][1] ..]] 'Relic Pluton', interface.data.current['Pluton']);imgui.SameLine();
     if (interface.data.current['Pluton'][1] < 0) then
         interface.data.current['Pluton'][1] =  0;
     elseif (interface.data.current['Pluton'][1] > 10000) then
@@ -340,7 +234,6 @@ function manager.DisplayRelics()
     end
     imgui.Text('Est. $: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Pluton'][1] * interface.data.current['Pluton'][1])));
-
     interface.data.current['Temp Sads'][1] = interface.data.current['Sad. Crystals'][1];--[1] for relics
     imgui.InputInt('Sad. Crystals', interface.data.current['Temp Sads']);imgui.SameLine();
     if (interface.data.current['Temp Sads'][1] < 0) then
@@ -352,77 +245,258 @@ function manager.DisplayRelics()
     end
     imgui.Text('Est. $: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][1])));
-
-    imgui.Spacing();
+    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'Total Gil Est: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Pluton'][1] * interface.data.current['Pluton'][1] + interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][1])));
-    imgui.Spacing();
+    imgui.NewLine();
+    if (imgui.Button('Update Relics')) then
+        print(chat.header(addon.name) .. chat.message('Updating Relic Weapons'));
+        interface.manager.UpdateRelics();
+    end
+end
+
+function manager.UpdateMythics()
+    local itemcounts = {0,0,0}; --{Alex,Scoria,Beitetsu}
+    local itemcountsIDs = {2488,3503,4060};
+
+    for weapon = 1, #interface.defaults.weapons.mythics do
+        -- for stage = #interface.defaults.weapons.mythics[weapon],1,-1 do
+            local stage = modifind.searchIdTable(interface.defaults.weapons.mythics[weapon]:reverse());
+            if (stage) then
+            -- if (modifind.searchId(interface.defaults.weapons.mythics[weapon][stage])) then
+                if (stage == #interface.defaults.weapons.mythics[weapon]) then
+                    interface.data.progress.weapons.mythics[weapon][3] = modifind.checkItemRankInfo(interface.defaults.weapons.mythics[weapon][stage]);
+                    interface.data.progress.weapons.mythics[weapon][2] = stage;
+                    -- break;
+                else
+                    interface.data.progress.weapons.mythics[weapon][2] = stage;
+                    for x = stage + 1, #interface.defaults.weapons.mythics[weapon] do
+                        for c = 1, #itemcounts do
+                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.mythicsreq[x][weapon][c];
+                        end
+                    end
+                    -- break;
+                end
+            else
+            -- elseif (stage == 1) and (modifind.searchId(interface.defaults.weapons.mythics[weapon][stage]) == false) then
+                for x = 1, #interface.defaults.weapons.mythics[weapon] do
+                    for c = 1, #itemcounts do
+                        itemcounts[c] = itemcounts[c] + interface.defaults.weapons.mythicsreq[x][weapon][c];
+                    end
+                end
+            end
+        -- end
+    end
+
+    for c = 1, #itemcounts do
+        interface.data.progress.weapons.mythicsneeds[c] = itemcounts[c] - modifind.countItemId(itemcountsIDs[c]);
+    end
+
+    local points = 0;
+    for weapon = 1, #interface.data.progress.weapons.mythics do
+        if interface.data.progress.weapons.mythics[weapon][3] == 0 then
+            for i = interface.data.progress.weapons.mythics[weapon][3] + 1, #manager.pointsmap do
+                points = points + manager.pointsmap[i];
+            end
+        else
+            for i = interface.data.progress.weapons.mythics[weapon][3], #manager.pointsmap do
+                points = points + manager.pointsmap[i];
+            end
+        end
+    end
+    interface.data.progress.weapons.mythicsneeds[4] = (points / 10) - modifind.countItemId(9875);
+end
+
+function manager.DisplayMythics()
+    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
+        AshitaCore:GetPacketManager():AddOutgoingPacket(0x10F, { 0x00, 0x00, 0x00, 0x00 });--update currency1
+        -- print('Currency Test')
+        check = false;
+    end
+    imgui.BeginTable('mythics table', 10, ImGuiTableFlags_Borders);
+    imgui.TableNextRow(ImGuiTableRowFlags_Headers);
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 75');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 80');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 85');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 90');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 95');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 99');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv.119 I');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv.119 III');
+    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Augmented');
+    imgui.TableNextRow();
+    for w = 1, #interface.defaults.weapons.mythics, 1 do
+        for i = 1, 9 do
+            if i == 1 then
+                imgui.TableNextColumn();
+                imgui.TextColored(interface.colors.header, interface.data.progress.weapons.mythics[w][1]);
+                imgui.TableNextColumn();
+                if interface.data.progress.weapons.mythics[w][2] >= i then
+                    imgui.TextColored(interface.colors.green,'Yup');
+                else
+                    imgui.TextColored(interface.colors.error,'Nupe');
+                end
+            elseif i <= 8 then
+                imgui.TableNextColumn();
+                if interface.data.progress.weapons.mythics[w][2] >= i then
+                    imgui.TextColored(interface.colors.green,'Yup');
+                else
+                    imgui.TextColored(interface.colors.error,'Nupe');
+                end
+            else
+                imgui.TableNextColumn();
+                if interface.data.progress.weapons.mythics[w][3] == 15 then
+                    imgui.TextColored(interface.colors.green, '15');
+                elseif interface.data.progress.weapons.mythics[w][3] > 0 then
+                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.weapons.mythics[w][3]));
+                else
+                    imgui.TextColored(interface.colors.error, '0');
+                end
+            end
+        end
+    end
+    imgui.EndTable();
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
+    imgui.BeginTable('mythic needed table', 5, ImGuiTableFlags_Borders);
+        imgui.TableNextRow(ImGuiTableRowFlags_Headers);
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Mythic Need:');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Alex');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Mulcibar\'s Scoria');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Beitetsu');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Sad Crystals');
+        imgui.TableNextColumn();
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[1])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[2])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[3])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[4])));
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Est. Gils:');
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.progress.weapons.mythicsneeds[1])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Mulcibar\'s Scoria'][1] * interface.data.progress.weapons.mythicsneeds[2])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.progress.weapons.mythicsneeds[3])));
+        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.mythicsneeds[4])));
+    imgui.EndTable();
+    imgui.NewLine();
+    imgui.TextColored(interface.colors.header, 'Current Weapon Remaining Items:');
+    imgui.TextColored(interface.colors.header, 'Tokens: ');imgui.SameLine();imgui.Text(interface.manager.comma_value(150000 - interface.data.current['Tokens'][1]));imgui.SameLine();
+    imgui.Text('(Est. Runs:');imgui.SameLine();
+    if (interface.data.current['Tokens'][1] < 150000) then
+        imgui.Text(tostring(tonumber(('%2i'):fmt((150000 - interface.data.current['Tokens'][1])/1500)) .. ')'));imgui.SameLine();
+    else
+        imgui.Text('0)');imgui.SameLine();
+    end
+    imgui.TextColored(interface.colors.header, '     Ichor: ')imgui.SameLine();imgui.Text(interface.manager.comma_value(100000 - interface.data.current['Ichor'][1]));imgui.SameLine();
+    imgui.Text('(Est. Runs:');imgui.SameLine();
+    if (interface.data.current['Ichor'][1] < 100000) then
+        imgui.Text(tostring(tonumber(('%2i'):fmt((100000 - interface.data.current['Ichor'][1])/1920)) .. ')'));imgui.SameLine();
+    else
+        imgui.Text('0)');imgui.SameLine();
+    end
+    imgui.NewLine();
+    imgui.InputInt(--[[interface.data.current['Mythic'][1] .. ]]'Alexandrite', interface.data.current['Alexandrite']);imgui.SameLine();
+    if (interface.data.current['Alexandrite'][1] < 0) then
+        interface.data.current['Alexandrite'][1] =  0;
+    elseif (interface.data.current['Alexandrite'][1] > 30000) then
+        interface.data.current['Alexandrite'][1] = 30000;
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.current['Alexandrite'][1])));
+    imgui.InputInt(--[[interface.data.current['Mythic'][2] ..]] 'Mythic Beitetsu', interface.data.current['Beitetsu']);imgui.SameLine();
+    if (interface.data.current['Beitetsu'][1] < 0) then
+        interface.data.current['Beitetsu'][1] =  0;
+    elseif (interface.data.current['Beitetsu'][1] > 10000) then
+        interface.data.current['Beitetsu'][1] = 10000;
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][1])));
+    interface.data.current['Temp Sads'][1] = interface.data.current['Sad. Crystals'][2];--[2] for mythics
+    imgui.InputInt('Sad. Crystals', interface.data.current['Temp Sads']);imgui.SameLine();
+    if (interface.data.current['Temp Sads'][1] < 0) then
+        interface.data.current['Sad. Crystals'][2] =  0;
+    elseif (interface.data.current['Temp Sads'][1] > 596) then
+        interface.data.current['Sad. Crystals'][2] = 596;
+    else
+        interface.data.current['Sad. Crystals'][2] = interface.data.current['Temp Sads'][1];
+    end
+    imgui.Text('Est. $: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][2])));
+    imgui.NewLine();
+    imgui.TextColored(interface.colors.header, 'Total Gil Est: ');imgui.SameLine();
+    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.current['Alexandrite'][1] + interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][1] + interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][1])));
+    if (imgui.Button('Update Mythics')) then
+        print(chat.header(addon.name) .. chat.message('Updated Mythic Weapons'));
+        interface.manager.UpdateMythics();
+    end
 end
 
 function manager.UpdateEmpyreans()
     local itemcounts = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; --{chloris,glavoid,briareus,cara,fistule,kukulkan,ironplates,ulhuadshi,itzpapalotl,sobek,lanterns,bukhis,sedna,colorless soul,dragua,orthus,apademak,isgebind,alfard,azdaja,HMP,dross,cinder,boulders}
     local itemcountsIDs = {2928,2927,2929,2930,2931,2932,3293,2963,2962,2964,2965,2966,2967,3294,3288,3287,3289,3290,3291,3292,3509,3498,3499,4061};
 
-    for w = 1, #interface.defaults.weapons.empyreans do
-        for i = #interface.defaults.weapons.empyreans[w],1,-1 do
-            if (manager.CheckItemId(interface.defaults.weapons.empyreans[w][i])) then
-                if (i == #interface.defaults.weapons.empyreans[w]) then
-                    interface.data.progress.weapons.empyreans[w][3] = manager.CheckItemRankInfo(interface.defaults.weapons.empyreans[w][i]);
-                    interface.data.progress.weapons.empyreans[w][2] = i;
-                    break;
-                elseif (w == 15 or w == 16) and (i == 2) and (manager.CheckItemId(interface.defaults.weapons.empyreans[w][i])) then
-                    if (manager.CheckItemRankInfo(interface.defaults.weapons.empyreans[w][i])) then
-                        interface.data.progress.weapons.empyreans[w][2] = i;
-                        for x = i, #interface.defaults.weapons.empyreans[w] do
+    for weapon = 1, #interface.defaults.weapons.empyreans do
+        -- for i = #interface.defaults.weapons.empyreans[weapon],1,-1 do
+            local stage = modifind.searchIdTable(interface.defaults.weapons.empyreans[weapon]:reverse());
+            if (stage) then
+            -- if (modifind.searchId(interface.defaults.weapons.empyreans[weapon][i])) then
+                if (stage == #interface.defaults.weapons.empyreans[weapon]) then
+                    interface.data.progress.weapons.empyreans[weapon][3] = modifind.checkItemRankInfo(interface.defaults.weapons.empyreans[weapon][stage]);
+                    interface.data.progress.weapons.empyreans[weapon][2] = stage;
+                    -- break;
+                elseif (weapon == 15 or weapon == 16) and (stage == 2) then
+                -- elseif (w == 15 or w == 16) and (i == 2) and (modifind.searchId(interface.defaults.weapons.empyreans[weapon][i])) then
+                    if (modifind.checkItemRankInfo(interface.defaults.weapons.empyreans[weapon][stage]) == true) then --leave the == true here explicitly for empy shield/harp
+                        interface.data.progress.weapons.empyreans[weapon][2] = stage;
+                        for x = stage, #interface.defaults.weapons.empyreans[weapon] do
                             for c = 1, #itemcounts do
-                                itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][w][c];
+                                itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
                             end
                         end
                     else
-                        interface.data.progress.weapons.empyreans[w][2] = i;
-                        for x = 1, #interface.defaults.weapons.empyreans[w] do
+                        interface.data.progress.weapons.empyreans[weapon][2] = stage;
+                        for x = 1, #interface.defaults.weapons.empyreans[weapon] do
                             for c = 1, #itemcounts do
-                                itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][w][c];
+                                itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
                             end
                         end
                     end
-                    break;
+                    -- break;
                 else
-                    interface.data.progress.weapons.empyreans[w][2] = i;
-                    for x = i + 1, #interface.defaults.weapons.empyreans[w] do
+                    interface.data.progress.weapons.empyreans[weapon][2] = stage;
+                    for x = stage + 1, #interface.defaults.weapons.empyreans[weapon] do
                         for c = 1, #itemcounts do
-                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][w][c];
+                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
                         end
                     end
-                    break;
+                    -- break;
                 end
-            elseif (i == 1) and (manager.CheckItemId(interface.defaults.weapons.empyreans[w][i]) == false) then
-                for x = 1, #interface.defaults.weapons.empyreans[w] do
+            else
+            -- elseif (i == 1) and (modifind.searchId(interface.defaults.weapons.empyreans[weapon][i]) == false) then
+                for x = 1, #interface.defaults.weapons.empyreans[weapon] do
                     for c = 1, #itemcounts do
-                        itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][w][c];
+                        itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
                     end
                 end
             end
-        end
+        -- end
     end
 
     for c = 1, #itemcounts do
-        interface.data.progress.weapons.empyreansneeds[c] = itemcounts[c] - manager.CountItemId(itemcountsIDs[c]);
+        interface.data.progress.weapons.empyreansneeds[c] = itemcounts[c] - modifind.countItemId(itemcountsIDs[c]);
     end
 
     local points = 0;
-    for w = 1, #interface.data.progress.weapons.empyreans do
-        if interface.data.progress.weapons.empyreans[w][3] == 0 then
-            for i = interface.data.progress.weapons.empyreans[w][3] + 1, #manager.pointsmap do
+    for weapon = 1, #interface.data.progress.weapons.empyreans do
+        if interface.data.progress.weapons.empyreans[weapon][3] == 0 then
+            for i = interface.data.progress.weapons.empyreans[weapon][3] + 1, #manager.pointsmap do
                 points = points + manager.pointsmap[i];
             end
         else
-            for i = interface.data.progress.weapons.empyreans[w][3], #manager.pointsmap do
+            for i = interface.data.progress.weapons.empyreans[weapon][3], #manager.pointsmap do
                 points = points + manager.pointsmap[i];
             end
         end
     end
-    interface.data.progress.weapons.empyreansneeds[25] = (points / 10) - manager.CountItemId(itemcountsIDs[9875]);
+    interface.data.progress.weapons.empyreansneeds[25] = (points / 10) - modifind.countItemId(9875);
 end
 
 function manager.DisplayEmpyreans()
@@ -438,7 +512,6 @@ function manager.DisplayEmpyreans()
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv.119 III');
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Augment Rank');
     imgui.TableNextRow();
-
     for w = 1, #interface.defaults.weapons.empyreans -2, 1 do
         for i = 1, 8 do
             if i == 1 then
@@ -446,21 +519,21 @@ function manager.DisplayEmpyreans()
                 imgui.TextColored(interface.colors.header, interface.data.progress.weapons.empyreans[w][1]);
                 imgui.TableNextColumn();
                 if interface.data.progress.weapons.empyreans[w][2] >= i then
-                    imgui.TextColored(interface.colors.text1,'Yup');
+                    imgui.TextColored(interface.colors.green,'Yup');
                 else
                     imgui.TextColored(interface.colors.error,'Nupe');
                 end
             elseif i <= 7 then
                 imgui.TableNextColumn();
                 if interface.data.progress.weapons.empyreans[w][2] >= i then
-                    imgui.TextColored(interface.colors.text1,'Yup');
+                    imgui.TextColored(interface.colors.green,'Yup');
                 else
                     imgui.TextColored(interface.colors.error,'Nupe');
                 end
             else
                 imgui.TableNextColumn();
                 if interface.data.progress.weapons.empyreans[w][3] == 15 then
-                    imgui.TextColored(interface.colors.text1, '15');
+                    imgui.TextColored(interface.colors.green, '15');
                 elseif interface.data.progress.weapons.empyreans[w][3] > 0 then
                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.weapons.empyreans[w][3]));
                 else
@@ -469,7 +542,6 @@ function manager.DisplayEmpyreans()
             end
         end
     end
-
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'SPECIALS');
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Base');
@@ -480,7 +552,6 @@ function manager.DisplayEmpyreans()
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 99');
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 99 Glow');
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, '');
-
     for s = #interface.defaults.weapons.empyreans -1, #interface.defaults.weapons.empyreans do
         for i = 1, 8 do
             if i == 1 then
@@ -488,14 +559,14 @@ function manager.DisplayEmpyreans()
                 imgui.TextColored(interface.colors.header, interface.data.progress.weapons.empyreans[s][1]);
                 imgui.TableNextColumn();
                 if interface.data.progress.weapons.empyreans[s][2] >= i then
-                    imgui.TextColored(interface.colors.text1,'Yup');
+                    imgui.TextColored(interface.colors.green,'Yup');
                 else
                     imgui.TextColored(interface.colors.error,'Nupe');
                 end
             elseif i <= 7 then
                 imgui.TableNextColumn();
                 if interface.data.progress.weapons.empyreans[s][2] >= i then 
-                    imgui.TextColored(interface.colors.text1,'Yup');
+                    imgui.TextColored(interface.colors.green,'Yup');
                 else
                     imgui.TextColored(interface.colors.error,'Nupe');
                 end
@@ -505,9 +576,7 @@ function manager.DisplayEmpyreans()
         end
     end
     imgui.EndTable();
-end
-
-function manager.DisplayEmpyreanNeeds()
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
     imgui.BeginTable('aby1 needed table', 8, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Abyssea Need:');
@@ -550,236 +619,63 @@ function manager.DisplayEmpyreanNeeds()
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.empyreansneeds[22])));
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.empyreansneeds[23])));
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Spacing();
+    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'Sad Crystals Needed: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.empyreansneeds[25])));
     imgui.TextColored(interface.colors.header, 'Est. Gil Needed: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.empyreansneeds[25])));
-    imgui.Spacing();imgui.Spacing();
-end
-
-function manager.UpdateMythics()
-    local itemcounts = {0,0,0}; --{Alex,Scoria,Beitetsu}
-    local itemcountsIDs = {2488,3503,4060};
-
-    for w = 1, #interface.defaults.weapons.mythics do
-        for i = #interface.defaults.weapons.mythics[w],1,-1 do
-            if (manager.CheckItemId(interface.defaults.weapons.mythics[w][i])) then
-                if (i == #interface.defaults.weapons.mythics[w]) then
-                    interface.data.progress.weapons.mythics[w][3] = manager.CheckItemRankInfo(interface.defaults.weapons.mythics[w][i]);
-                    interface.data.progress.weapons.mythics[w][2] = i;
-                    break;
-                else
-                    interface.data.progress.weapons.mythics[w][2] = i;
-                    for x = i + 1, #interface.defaults.weapons.mythics[w] do
-                        for c = 1, #itemcounts do
-                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.mythicsreq[x][w][c];
-                        end
-                    end
-                    break;
-                end
-            elseif (i == 1) and (manager.CheckItemId(interface.defaults.weapons.mythics[w][i]) == false) then
-                for x = 1, #interface.defaults.weapons.mythics[w] do
-                    for c = 1, #itemcounts do
-                        itemcounts[c] = itemcounts[c] + interface.defaults.weapons.mythicsreq[x][w][c];
-                    end
-                end
-            end
-        end
+    imgui.NewLine();
+    if (imgui.Button('Update Empyreans')) then
+        print(chat.header(addon.name) .. chat.message('Updated Empyrean Weapons'));
+        interface.manager.UpdateEmpyreans();
     end
-
-    for c = 1, #itemcounts do
-        interface.data.progress.weapons.mythicsneeds[c] = itemcounts[c] - manager.CountItemId(itemcountsIDs[c]);
-    end
-
-    local points = 0;
-    for w = 1, #interface.data.progress.weapons.mythics do
-        if interface.data.progress.weapons.mythics[w][3] == 0 then
-            for i = interface.data.progress.weapons.mythics[w][3] + 1, #manager.pointsmap do
-                points = points + manager.pointsmap[i];
-            end
-        else
-            for i = interface.data.progress.weapons.mythics[w][3], #manager.pointsmap do
-                points = points + manager.pointsmap[i];
-            end
-        end
-    end
-    interface.data.progress.weapons.mythicsneeds[4] = (points / 10) - manager.CountItemId(9875);
-end
-
-function manager.DisplayMythics()
-    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
-        AshitaCore:GetPacketManager():AddOutgoingPacket(0x10F, { 0x00, 0x00, 0x00, 0x00 });--update currency1
-        -- print('Currency Test')
-        check = false;
-    end
-    --imgui.Spacing();
-    imgui.BeginTable('mythics table', 10, ImGuiTableFlags_Borders);
-    imgui.TableNextRow(ImGuiTableRowFlags_Headers);
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 75');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 80');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 85');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 90');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 95');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv. 99');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv.119 I');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Lv.119 III');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Augmented');
-    imgui.TableNextRow();
-
-    for w = 1, #interface.defaults.weapons.mythics, 1 do
-        for i = 1, 9 do
-            if i == 1 then
-                imgui.TableNextColumn();
-                imgui.TextColored(interface.colors.header, interface.data.progress.weapons.mythics[w][1]);
-                imgui.TableNextColumn();
-                if interface.data.progress.weapons.mythics[w][2] >= i then
-                    imgui.TextColored(interface.colors.text1,'Yup');
-                else
-                    imgui.TextColored(interface.colors.error,'Nupe');
-                end
-            elseif i <= 8 then
-                imgui.TableNextColumn();
-                if interface.data.progress.weapons.mythics[w][2] >= i then
-                    imgui.TextColored(interface.colors.text1,'Yup');
-                else
-                    imgui.TextColored(interface.colors.error,'Nupe');
-                end
-            else
-                imgui.TableNextColumn();
-                if interface.data.progress.weapons.mythics[w][3] == 15 then
-                    imgui.TextColored(interface.colors.text1, '15');
-                elseif interface.data.progress.weapons.mythics[w][3] > 0 then
-                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.weapons.mythics[w][3]));
-                else
-                    imgui.TextColored(interface.colors.error, '0');
-                end
-            end
-        end
-    end
-    imgui.EndTable();
-
-    --imgui.Spacing();imgui.Spacing();
-    imgui.BeginTable('mythic needed table', 5, ImGuiTableFlags_Borders);
-        imgui.TableNextRow(ImGuiTableRowFlags_Headers);
-        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Mythic Need:');
-        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Alex');
-        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Mulcibar\'s Scoria');
-        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Beitetsu');
-        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Sad Crystals');
-        imgui.TableNextColumn();
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[1])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[2])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[3])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.progress.weapons.mythicsneeds[4])));
-        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Est. Gils:');
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.progress.weapons.mythicsneeds[1])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Mulcibar\'s Scoria'][1] * interface.data.progress.weapons.mythicsneeds[2])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.progress.weapons.mythicsneeds[3])));
-        imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.mythicsneeds[4])));
-    imgui.EndTable();
-
-    --imgui.Spacing();
-    imgui.TextColored(interface.colors.header, 'Current Weapon Remaining Items:');
-    imgui.TextColored(interface.colors.header, 'Tokens: ');imgui.SameLine();imgui.Text(interface.manager.comma_value(interface.data.current['Tokens'][1]));imgui.SameLine();
-    imgui.Text('(Est. Runs:');imgui.SameLine();
-    if (interface.data.current['Tokens'][1] < 150000) then
-        imgui.Text(tostring(tonumber(('%2i'):fmt(interface.data.current['Tokens'][1]/2000)) .. ')'));imgui.SameLine();
-    else
-        imgui.Text('0)');imgui.SameLine();
-    end
-    imgui.TextColored(interface.colors.header, '     Ichor: ')imgui.SameLine();imgui.Text(interface.manager.comma_value(interface.data.current['Ichor'][1]));imgui.SameLine();
-    imgui.Text('(Est. Runs:');imgui.SameLine();
-    if (interface.data.current['Ichor'][1] < 100000) then
-        imgui.Text(tostring(tonumber(('%2i'):fmt(interface.data.current['Ichor'][1]/1920)) .. ')'));imgui.SameLine();
-    else
-        imgui.Text('0)');imgui.SameLine();
-    end
-    
-    imgui.Spacing();
-
-    imgui.InputInt(--[[interface.data.current['Mythic'][1] .. ]]'Traded Alexandrite', interface.data.current['Alexandrite']);imgui.SameLine();
-    if (interface.data.current['Alexandrite'][1] < 0) then
-        interface.data.current['Alexandrite'][1] =  0;
-    elseif (interface.data.current['Alexandrite'][1] > 30000) then
-        interface.data.current['Alexandrite'][1] = 30000;
-    end
-    imgui.Text('Est. $: ');imgui.SameLine();
-    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.current['Alexandrite'][1])));
-    
-    imgui.InputInt(interface.data.current['Mythic'][2] .. ' Beitetsu', interface.data.current['Beitetsu']);imgui.SameLine();
-    if (interface.data.current['Beitetsu'][1] < 0) then
-        interface.data.current['Beitetsu'][1] =  0;
-    elseif (interface.data.current['Beitetsu'][1] > 10000) then
-        interface.data.current['Beitetsu'][1] = 10000;
-    end
-    imgui.Text('Est. $: ');imgui.SameLine();
-    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][1])));
-
-    interface.data.current['Temp Sads'][1] = interface.data.current['Sad. Crystals'][2];--[2] for mythics
-    imgui.InputInt('Sad. Crystals', interface.data.current['Temp Sads']);imgui.SameLine();
-    if (interface.data.current['Temp Sads'][1] < 0) then
-        interface.data.current['Sad. Crystals'][2] =  0;
-    elseif (interface.data.current['Temp Sads'][1] > 596) then
-        interface.data.current['Sad. Crystals'][2] = 596;
-    else
-        interface.data.current['Sad. Crystals'][2] = interface.data.current['Temp Sads'][1];
-    end
-    imgui.Text('Est. $: ');imgui.SameLine();
-    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][2])));
-
-    imgui.Spacing();
-    imgui.TextColored(interface.colors.header, 'Total Gil Est: ');imgui.SameLine();
-    imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.current['Alexandrite'][1] + interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][1] + interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][1])));
-    imgui.Spacing();
 end
 
 function manager.UpdateErgons()
     interface.data.progress.weapons.ergonNeeds = {26198,8600000,20000,1192};--{bayld,plasm,beitetsu,sad crystals}
 
-    for w = 1, #interface.data.progress.weapons.ergons do
-        for c = 2, #interface.data.progress.weapons.ergons[w] do
+    for weapon = 1, #interface.data.progress.weapons.ergons do
+        -- key item and item checks relating to each ergon
+        for c = 2, #interface.data.progress.weapons.ergons[weapon] do
             if c <= 6 then
-                local check = manager.CheckKeyItemName(interface.defaults.weapons.ergons[w][c]);
+                local check = modifind.searchKeyItemName(interface.defaults.weapons.ergons[weapon][c]);
                 if (check == false) and (c > 2) then
-                    check = manager.CheckItemId(interface.defaults.weapons.ergons[w+2][c]);
+                    check = modifind.searchId(interface.defaults.weapons.ergons[weapon+2][c]);
                 end
-                interface.data.progress.weapons.ergons[w][c] = check;
+                interface.data.progress.weapons.ergons[weapon][c] = check;
                 if check == true then
                     for b = c -1, 2, -1 do
-                        interface.data.progress.weapons.ergons[w][b] = check;
+                        interface.data.progress.weapons.ergons[weapon][b] = check;
                     end
                 end
             elseif c <= 8 then
-                local check = manager.CheckItemId(interface.defaults.weapons.ergons[w][c]);
-                interface.data.progress.weapons.ergons[w][c] = check;
+                local check = modifind.searchId(interface.defaults.weapons.ergons[weapon][c]);
+                interface.data.progress.weapons.ergons[weapon][c] = check;
                 if check == true then
                     for b = c -1, 2, -1 do
-                        interface.data.progress.weapons.ergons[w][b] = check;
+                        interface.data.progress.weapons.ergons[weapon][b] = check;
                     end
                 end
             elseif c == 9 then
-                interface.data.progress.weapons.ergons[w][c] = manager.CheckItemRankInfo(interface.defaults.weapons.ergons[w][c]);
+                interface.data.progress.weapons.ergons[weapon][c] = modifind.checkItemRankInfo(interface.defaults.weapons.ergons[weapon][c - 1]);
             end
         end
     end
 
-    for w = 1, #interface.data.progress.weapons.ergons do
+    for weapon = 1, #interface.data.progress.weapons.ergons do
         local needs = {{0,0,100,500,2500,9999,0,0,0},{0,0,0,900000,900000,2500000,0,0,0},{0,0,0,0,0,0,0,10000,0},{0,0,0,0,0,0,0,0,596}};--{bayld,plasm,beitetsu,sad crystals} needed for each of the nine stages
-        local map = {50, 80, 120, 170, 220, 280, 340, 410, 480, 560, 650, 750, 960, 980};--points required for each rank, sad crystals worth 10 points each...
-        for x = #interface.data.progress.weapons.ergons[w], 2, -1 do
+        -- local map = {50, 80, 120, 170, 220, 280, 340, 410, 480, 560, 650, 750, 960, 980};--points required for each rank, sad crystals worth 10 points each...
+        for x = #interface.data.progress.weapons.ergons[weapon], 2, -1 do
             if x == 9 then
-                for m = 1, #map do
-                    if interface.data.progress.weapons.ergons[w][x] > m then
-                        needs[4][x] = needs[4][x] - map[m];
+                for m = 1, #manager.pointsmap do
+                    if interface.data.progress.weapons.ergons[weapon][x] > m then
+                        needs[4][x] = needs[4][x] - manager.pointsmap[m];
                     end
-                    if interface.data.progress.weapons.ergons[w][x] == #map then
+                    if interface.data.progress.weapons.ergons[weapon][x] == #manager.pointsmap then
                         needs[4][x] = 0;
                     end
                 end
-            elseif interface.data.progress.weapons.ergons[w][x] == true then
+            elseif interface.data.progress.weapons.ergons[weapon][x] == true then
                 for n = 1, #interface.data.progress.weapons.ergonNeeds do
                     local count = 0;
                     for c = x, 2, -1 do
@@ -799,8 +695,6 @@ function manager.DisplayErgons()
         -- print('Currency Test')
         check = false;
     end
-
-    imgui.Spacing();imgui.Spacing();imgui.Spacing();imgui.Spacing();imgui.Spacing();
     imgui.BeginTable('ergon table', #interface.defaults.weapons.ergons[1], ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
@@ -821,7 +715,7 @@ function manager.DisplayErgons()
             elseif c <= 8 then
                 imgui.TableNextColumn();
                 if interface.data.progress.weapons.ergons[w][c] == true then
-                    imgui.TextColored(interface.colors.text1,'Yup');
+                    imgui.TextColored(interface.colors.green,'Yup');
                 else
                     imgui.TextColored(interface.colors.error,'Nupe');
                 end
@@ -834,14 +728,13 @@ function manager.DisplayErgons()
                 elseif rank <= 14 then
                     imgui.TextColored(interface.colors.warning, rankstring);
                 else
-                    imgui.TextColored(interface.colors.text1, rankstring);
+                    imgui.TextColored(interface.colors.green, rankstring);
                 end
             end
         end
     end
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Spacing();
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
     imgui.BeginTable('ergon needed table', 5, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Ergon Need:');
@@ -860,11 +753,8 @@ function manager.DisplayErgons()
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.progress.weapons.ergonNeeds[3])));
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.ergonNeeds[4])));
     imgui.EndTable();
-
-    imgui.Spacing();
+    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'Current Weapon Remaining Items:');
-    imgui.Spacing();
-
     imgui.InputInt(--[[interface.data.current['H-P Bayld'][1] .. ]]'Traded H-P Bayld', interface.data.current['H-P Bayld']);imgui.SameLine();
     if (interface.data.current['H-P Bayld'][1] < 0) then
         interface.data.current['H-P Bayld'][1] =  0;
@@ -873,9 +763,8 @@ function manager.DisplayErgons()
     end
     imgui.Text('Est. $: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['H-P Bayld'][1] * interface.data.current['H-P Bayld'][1])));
-    
     interface.data.current['Temp Beit'][1] = interface.data.current['Beitetsu'][2];--[2] for ergons
-    imgui.InputInt(interface.data.current['Ergon'][1] .. ' Beitetsu', interface.data.current['Temp Beit']);imgui.SameLine();
+    imgui.InputInt(--[[interface.data.current['Ergon'][1] ..]] 'Ergon Beitetsu', interface.data.current['Temp Beit']);imgui.SameLine();
     if (interface.data.current['Temp Beit'][1] < 0) then
         interface.data.current['Beitetsu'][2] =  0;
     elseif (interface.data.current['Temp Beit'][1] > 10000) then
@@ -885,7 +774,6 @@ function manager.DisplayErgons()
     end
     imgui.Text('Est. $: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][2])));
-
     interface.data.current['Temp Sads'][1] = interface.data.current['Sad. Crystals'][4];--[4] for ergons
     imgui.InputInt('Sad. Crystals', interface.data.current['Temp Sads']);imgui.SameLine();
     if (interface.data.current['Temp Sads'][1] < 0) then
@@ -897,11 +785,121 @@ function manager.DisplayErgons()
     end
     imgui.Text('Est. $: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][4])));
-
-    imgui.Spacing();
+    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'Total Gil Est: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['H-P Bayld'][1] * interface.data.current['H-P Bayld'][1] + interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][2] + interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][4])));
-    imgui.Spacing();
+    imgui.NewLine();
+    if (imgui.Button('Update Ergons')) then
+        print(chat.header(addon.name) .. chat.message('Updated Ergon Weapons'));
+        interface.manager.UpdateErgons();
+    end
+end
+
+function manager.UpdatePrimes()
+    local itemcounts = {0,0}; --{Gallimaufry,Eikondrite}
+    local itemcountsIDs = {0,9929,};
+
+    for weapon = 1, #interface.defaults.weapons.primes do
+        local stage = modifind.searchIdTable(interface.defaults.weapons.primes[weapon]:reverse());
+        if (stage) then
+            if (stage == #interface.defaults.weapons.primes[weapon]) then
+                -- interface.data.progress.weapons.primes[weapon][3] = modifind.checkItemRankInfo(interface.defaults.weapons.primes[weapon][stage]);
+                interface.data.progress.weapons.primes[weapon][2] = stage;
+            else
+                interface.data.progress.weapons.primes[weapon][2] = stage;
+                for x = stage + 1, #interface.defaults.weapons.primes[weapon] do
+                    for c = 1, #itemcounts do
+                        itemcounts[c] = itemcounts[c] + interface.defaults.weapons.primesreq[x][weapon][c];
+                    end
+                end
+            end
+        else
+            for x = 1, #interface.defaults.weapons.primes[weapon] do
+                for c = 1, #itemcounts do
+                    itemcounts[c] = itemcounts[c] + interface.defaults.weapons.primesreq[x][weapon][c];
+                end
+            end
+        end
+    end
+
+    for c = 1, #itemcounts do
+        interface.data.progress.weapons.primesneeds[c] = itemcounts[c] - modifind.countItemId(itemcountsIDs[c]);
+    end
+
+    -- local points = 0;
+    -- for weapon = 1, #interface.data.progress.weapons.primes do
+    --     if interface.data.progress.weapons.primes[weapon][3] == 0 then
+    --         for i = interface.data.progress.weapons.primes[weapon][3] + 1, #manager.pointsmap do
+    --             points = points + manager.pointsmap[i];
+    --         end
+    --     else
+    --         for i = interface.data.progress.weapons.primes[weapon][3], #manager.pointsmap do
+    --             points = points + manager.pointsmap[i];
+    --         end
+    --     end
+    -- end
+    -- interface.data.progress.weapons.primesneeds[4] = (points / 10) - modifind.countItemId(9875);
+end
+
+function manager.DisplayPrimes()
+    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
+        AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2galli
+        check = false;
+    end
+    imgui.BeginTable('primes table', 3, ImGuiTableFlags_Borders);
+        imgui.TableNextRow(ImGuiTableRowFlags_Headers);
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Base Wep');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Stage 2');
+        imgui.TableNextRow();
+        for weapon = 1, #interface.defaults.weapons.primes do
+            for stage = 1, 2 do
+                if stage == 1 then
+                    imgui.TableNextColumn();
+                    imgui.TextColored(interface.colors.header, interface.data.progress.weapons.primes[weapon][1]);
+                    imgui.TableNextColumn();
+                    if interface.data.progress.weapons.primes[weapon][2] >= stage then
+                        imgui.TextColored(interface.colors.green,'Yup');
+                    else
+                        imgui.TextColored(interface.colors.error,'Nupe');
+                    end
+                else--if stage <= 9 then
+                    imgui.TableNextColumn();
+                    if interface.data.progress.weapons.primes[weapon][2] >= stage then
+                        imgui.TextColored(interface.colors.green,'Yup');
+                    else
+                        imgui.TextColored(interface.colors.error,'Nupe');
+                    end
+                -- else
+                --     imgui.TableNextColumn();
+                --     if interface.data.progress.weapons.primes[weapon][3] == 15 then
+                --         imgui.TextColored(interface.colors.green, '15');
+                --     elseif interface.data.progress.weapons.primes[weapon][3] > 0 then
+                --         imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.weapons.primes[weapon][3]));
+                --     else
+                --         imgui.TextColored(interface.colors.error, '0');
+                --     end
+                end
+            end
+        end
+    imgui.EndTable();
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
+    imgui.BeginTable('prime needed table', 3, ImGuiTableFlags_Borders);
+        imgui.TableNextRow(ImGuiTableRowFlags_Headers);
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Primes Needs:');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Gallimaufry');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Eikondrite');
+        imgui.TableNextColumn();
+        imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.primesneeds[1]));
+        imgui.TableNextColumn();imgui.Text(manager.comma_value(interface.data.progress.weapons.primesneeds[2]));
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Est. Gils:');
+        imgui.TableNextColumn();imgui.Text('Current: ' .. manager.comma_value(interface.data.current['Gallimaufry'][1]));
+    imgui.EndTable();
+    imgui.NewLine();
+    if (imgui.Button('Update Primes')) then
+        print(chat.header(addon.name) .. chat.message('Updated Prime Weapons'));
+        interface.manager.UpdatePrimes();
+    end
 end
 
 function manager.UpdateAmbuWeps()
@@ -912,7 +910,7 @@ function manager.UpdateAmbuWeps()
         elseif interface.data.progress.weapons.ambu[a][1] == 0 then
         else count = interface.data.progress.weapons.ambu[a][1] end
         for b = count, #interface.defaults.weapons.ambu[a] do
-            if (modifind.search(interface.defaults.weapons.ambu[a][b])) then
+            if (modifind.searchId(interface.defaults.weapons.ambu[a][b])) then
                 interface.data.progress.weapons.ambu[a][1] = b;
             end
         end
@@ -920,21 +918,7 @@ function manager.UpdateAmbuWeps()
 end
 
 function manager.DisplayAmbuWeps()
-    imgui.Spacing();imgui.Spacing();
-    imgui.TableNextRow(ImGuiTableRowFlags_Headers);
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
-    for a = 1, #interface.data.progress.weapons.ambu do
-        imgui.TableNextColumn();
-        local temp = {interface.data.progress.weapons.ambu[a][1]};
-        if (imgui.Combo(interface.data.progress.weapons.ambu[a][2], temp, 'None\0Tokko\0Ajja\0Eletta\0Kaja\0Complete\0')) then
-            interface.data.progress.weapons.ambu[a][1] = temp[1];
-        end
-    end
-end
-
-function manager.DisplayAmbuWepsNeed()
     local items = T{0,0,0,0,0,0}; --voucher,nugget,gem,anima,matter,pulse,
-
     for a = 1, #interface.data.progress.weapons.ambu do
         if (interface.data.progress.weapons.ambu[a][1] < 5) then
             items[6] = items[6] + 1;
@@ -953,34 +937,51 @@ function manager.DisplayAmbuWepsNeed()
             items[1] = items[1] + 1;
         end
     end
-
-    imgui.Spacing();imgui.Spacing();
-    imgui.TableNextRow(ImGuiTableRowFlags_Headers);
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'NEEDED:');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Vouchers');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Nuggets');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Gems:');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Animas');
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Matters');
-    imgui.TableNextColumn();
-
-    for b = 1, (#items -1) do
+    imgui.BeginTable('ambu weps table', 1, ImGuiTableFlags_Borders);
+        imgui.TableNextRow(ImGuiTableRowFlags_Headers);
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
+        for a = 1, #interface.data.progress.weapons.ambu do
+            imgui.TableNextColumn();
+            local temp = {interface.data.progress.weapons.ambu[a][1]};
+            if (imgui.Combo(interface.data.progress.weapons.ambu[a][2], temp, 'None\0Tokko\0Ajja\0Eletta\0Kaja\0Complete\0')) then
+                interface.data.progress.weapons.ambu[a][1] = temp[1];
+            end
+        end
+    imgui.EndTable();
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
+    imgui.BeginTable('ambu weps need', 6, ImGuiTableFlags_Borders);
+        imgui.TableNextRow(ImGuiTableRowFlags_Headers);
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'NEEDED:');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Vouchers');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Nuggets');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Gems:');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Animas');
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Matters');
         imgui.TableNextColumn();
-        imgui.Text(tostring(items[b]));
-    end
-    local pulsecount = 0;
-    for i = 1, #interface.defaults.weapons.pulse do
-        pulsecount = pulsecount + manager.CountItemId(interface.defaults.weapons.pulse[i]);
-    end
-    if (pulsecount > items[6]) then
-        items[6] = 0
-    else
-        items[6] = items[6] - pulsecount;
-    end
-    imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Need Pulse Weapons:  ');
-    imgui.TableNextColumn();imgui.Text(tostring(items[6]));
 
-    interface.data.progress.weapons.ambuWepItems = items:merge(items, true);
+        for b = 1, (#items -1) do
+            imgui.TableNextColumn();
+            imgui.Text(tostring(items[b]));
+        end
+        local pulsecount = 0;
+        for i = 1, #interface.defaults.weapons.pulse do
+            pulsecount = pulsecount + modifind.countItemId(interface.defaults.weapons.pulse[i]);
+        end
+        if (pulsecount > items[6]) then
+            items[6] = 0
+        else
+            items[6] = items[6] - pulsecount;
+        end
+        imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Need Pulse Weapons:  ');
+        imgui.TableNextColumn();imgui.Text(tostring(items[6]));
+
+        interface.data.progress.weapons.ambuWepItems = items:merge(items, true);
+    imgui.EndTable();
+    imgui.NewLine();
+    if (imgui.Button('Update Ambu Weps')) then
+        print(chat.header(addon.name) .. chat.message('Updated Ambu Weapons'));
+        interface.manager.UpdateAmbuWeps();
+    end
 end
 
 function manager.UpdateWeapons()
@@ -988,6 +989,7 @@ function manager.UpdateWeapons()
     manager.UpdateEmpyreans();
     manager.UpdateMythics();
     manager.UpdateErgons();
+    manager.UpdatePrimes();
     manager.UpdateAmbuWeps();
 end
 
@@ -995,20 +997,24 @@ function manager.UpdateAFGear()
     local countgear = 0;
     local totalgear = #interface.defaults.gear.af * #interface.defaults.gear.af[1] * #interface.defaults.gear.af[1][1];
 
-    for a = 1, (#interface.defaults.gear.af - 1) do
-        for b = 1, #interface.defaults.gear.af[a] do
-            for c = #interface.defaults.gear.af[a][b], interface.data.progress.gear.af[a][b][1], -1  do --checks from highest to lowest in case have random NQ in storage would give false positive modifind.search 
-                if c < 1 then break end;
-                if (modifind.search(interface.defaults.gear.af[a][b][c]) == true) then
-                    interface.data.progress.gear.af[a][b][1] = c;
-                    break;
-                end
-                if (a == 19) and (modifind.search(interface.defaults.gear.af[23][b][c]) == true) then --added bit here for stupid female dnc af
-                    interface.data.progress.gear.af[a][b][1] = c;
-                    break;
+    for job = 1, (#interface.defaults.gear.af - 1) do
+        for slot = 1, #interface.defaults.gear.af[job] do
+            local index;
+            local myIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
+	        local my = GetEntity(myIndex);
+            if job == 19 and (my.Race == 2 or my.Race == 4 or my.Race == 6 or my.Race == 7) then
+                index = modifind.searchIdTable(interface.defaults.gear.af[23][slot]:reverse());
+            else
+                index = modifind.searchIdTable(interface.defaults.gear.af[job][slot]:reverse());
+            end
+            if (index) then
+                if job == 21 or job == 22 then
+                    interface.data.progress.gear.af[job][slot][1] = index + 2;--offset for geo and run for gear starting at 109
+                else
+                    interface.data.progress.gear.af[job][slot][1] = index;
                 end
             end
-            countgear = countgear + interface.data.progress.gear.af[a][b][1];
+            countgear = countgear + interface.data.progress.gear.af[job][slot][1];
         end
     end
 
@@ -1052,28 +1058,28 @@ function manager.CountAFGearInv(items)
             slot2 = 8728;
             slot3 = 8981;
         end
-        items[1][y][1] = 0 - manager.CountItemId(chap1); --countchapt 1-5
-        items[2][y][1] = 0 - manager.CountItemId(chap2); --countchapt 6-10
-        items[1][y][2] = 0 - manager.CountItemId(slot1); --count 109slot
-        items[2][y][2] = 0 - manager.CountItemId(slot2); --count 1191slot
-        items[3][y][1] = 0 - manager.CountItemId(slot3); --count 1192slot
+        items[1][y][1] = 0 - modifind.countItemId(chap1); --countchapt 1-5
+        items[2][y][1] = 0 - modifind.countItemId(chap2); --countchapt 6-10
+        items[1][y][2] = 0 - modifind.countItemId(slot1); --count 109slot
+        items[2][y][2] = 0 - modifind.countItemId(slot2); --count 1191slot
+        items[3][y][1] = 0 - modifind.countItemId(slot3); --count 1192slot
     end
 
     local checks1 = {0,0,855,823,2340,2288,1699,752,664,657}; -- lv109 extra items in order of default array: blank,blank,tiger leather,gold thread,imp.silk cloth,karakul cloth,scarlet linen,gold sheet,DS sheet,Tama Hagane
     local checks2 = {0,0,862,2476,1132,2200,1313,668,758,658}; -- lv119+1 extra items in order of default array: blank,blank,behe leather, plat silk thread, raxa, twill damask, siren's hair, ori sheet, durium sheet, dama. ingot
     for i = 3, #items[1][1] do
-        items[1][1][i] = 0 - manager.CountItemId(checks1[i]);
-        items[2][1][i] = 0 - manager.CountItemId(checks2[i]);
+        items[1][1][i] = 0 - modifind.countItemId(checks1[i]);
+        items[2][1][i] = 0 - modifind.countItemId(checks2[i]);
     end
 
     local checks3 = {0,9253,9245,9251,9257,9255,9249,9247};-- lv119+1 extra items in order of default array: blank,S.Faulpie Leather,Cypress Log,Khoma Thread,Azure Leaf,Cyan Coral,Ruthenium Ore,Niobium Ore,
     for i = 3, #items[3][1] do
-        items[3][1][i] = 0 - manager.CountItemId(checks3[i]);
+        items[3][1][i] = 0 - modifind.countItemId(checks3[i]);
     end
 
     local checks4 = {9303,9305,9304,9307,9306,9253,9245,9246,9251,9252,9258,9256,9250,9248,9254};-- lv119+1 extra items in order of default array: kin,kei,gin,fu,kyou,S.Faulpie Leather,Cypress Log,cypress Lbr,Khoma Thread,khoma cloth,Azure Cermet,Cyan Orb,Ruthenium Ingot,Niobium Ingot,Faulpie Leather
     for i = 3, #items[4][1] do
-        items[4][1][i] = 0 - manager.CountItemId(checks4[i]);
+        items[4][1][i] = 0 - modifind.countItemId(checks4[i]);
     end
 
     return items;
@@ -1221,7 +1227,6 @@ end
 
 function manager.DisplayAFGear()
     imgui.BeginTable('af gear has', 5, ImGuiTableFlags_Borders);
-    imgui.Spacing();imgui.Spacing();
     for a = 1, #interface.data.progress.gear.af do
         for b = 1, #interface.data.progress.gear.af[a] do
             imgui.TableNextColumn();
@@ -1232,12 +1237,14 @@ function manager.DisplayAFGear()
         end
     end
     imgui.EndTable();
+    imgui.NewLine();
+    
+    imgui.TextColored(interface.colors.header, 'Progress: ');imgui.SameLine();imgui.ProgressBar(interface.data.progress.gear.afProgress[1],10);
+    imgui.NewLine();
     if (imgui.Button('Update AF Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated AF Gear'));
         interface.manager.UpdateAFGear();
     end
-    imgui.SameLine();
-    imgui.ProgressBar(interface.data.progress.gear.afProgress[1],10);
 end
 
 function manager.DisplayAFGearNeed()
@@ -1487,18 +1494,28 @@ function manager.DisplayAFGearNeed()
 end
 
 function manager.UpdateRelicGear()
+    --one time count of relic unlock KI's, also set global check to false for safety of not spamming currency packets accidently
+    -- AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2 (removed here for safety due to potential button spam)
+    for k,v in ipairs(interface.defaults.gear.relicUnlockKeyItems) do
+        if (modifind.searchKeyItemName(v)) then
+            interface.data.progress.gear.relicUnlocks[k] = true;
+        end
+    end
+    check = false;
+
     local countgear = 0;
     local totalgear = #interface.defaults.gear.relic * #interface.defaults.gear.relic[1] * #interface.defaults.gear.relic[1][1];
-    for a = 1, #interface.defaults.gear.relic do
-        for b = 1, #interface.defaults.gear.relic[a] do
-            for c = #interface.defaults.gear.relic[a][b], interface.data.progress.gear.relic[a][b][1], -1  do --checks from highest to lowest in case have random NQ in storage would give false positive modifind.search 
-                if c < 1 then break end;
-                if (modifind.search(interface.defaults.gear.relic[a][b][c]) == true) then
-                    interface.data.progress.gear.relic[a][b][1] = c;
-                    break;
+    for job = 1, #interface.defaults.gear.relic do
+        for slot = 1, #interface.defaults.gear.relic[job] do
+            local index = modifind.searchIdTable(interface.defaults.gear.relic[job][slot]:reverse());
+            if (index) then
+                if job == 21 or job == 22 then
+                    interface.data.progress.gear.relic[job][slot][1] = index + 3;--offset for geo and run for gear starting at 109
+                else
+                    interface.data.progress.gear.relic[job][slot][1] = index;
                 end
             end
-            countgear = countgear + interface.data.progress.gear.relic[a][b][1];
+            countgear = countgear + interface.data.progress.gear.relic[job][slot][1];
         end
     end
     interface.data.progress.gear.relicProgress[1] = countgear/totalgear;
@@ -1510,28 +1527,28 @@ function manager.CountRelicGearInv(items)
 
     local forgottenIDs = {3493,3494,3495,3496,3497};
     for i = 1, #forgottenIDs do
-        items[1][i] = items[1][i] - manager.CountItemId(forgottenIDs[i]);
+        items[1][i] = items[1][i] - modifind.countItemId(forgottenIDs[i]);
     end
 
     local checks1 = {0,0,1469,1516,1470,1458,1466,1464};--{blank,blank,wootze ore,griffon hide,sparkling stone,mammoth tusk,relic iron,lancewood log,}
     for i = 3, #checks1 do
-        items[2][1][i] = items[2][1][i] - manager.CountItemId(checks1[i]);
+        items[2][1][i] = items[2][1][i] - modifind.countItemId(checks1[i]);
     end
 
     local checks2 = {0,0,3447,3492,3491,3490,3445,3449};--{blank,blank,voidwrought plate,kaggen's cuticle,akvan's pennon,pil's tuille,hahava's mail,celaeno's cloth'}
     for i = 3, #checks2 do
-        items[3][1][i] = items[3][1][i] - manager.CountItemId(checks2[i]);
+        items[3][1][i] = items[3][1][i] - modifind.countItemId(checks2[i]);
     end
 
     local checks3 = {0,9253,9245,9251,9257,9255,9249,9247};--{blank,S.Faulpie Leather,Cypress Log,Khoma Thread,Azure Leaf,Cyan Coral,Ruthenium Ore,Niobium Ore,}
     for i = 3, #checks3 do
-        items[4][1][i] = items[4][1][i] - manager.CountItemId(checks3[i]);
+        items[4][1][i] = items[4][1][i] - modifind.countItemId(checks3[i]);
     end
 
     for j = 1, #items[5] do
         for s = 1, #items[5][j] do
-            items[5][j][s][1] = 0 - manager.CountItemId(interface.defaults.gear.relicshards[s][j]);
-            items[5][j][s][2] = 0 - manager.CountItemId(interface.defaults.gear.relicvoids[s][j]);
+            items[5][j][s][1] = 0 - modifind.countItemId(interface.defaults.gear.relicshards[s][j]);
+            items[5][j][s][2] = 0 - modifind.countItemId(interface.defaults.gear.relicvoids[s][j]);
         end
     end
 
@@ -1632,9 +1649,13 @@ function manager.CountRelicGear()
 end
 
 function manager.DisplayRelicGear()
-    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
+    if check == true then -- global that gets set true on first addon load and once again whenever the display is first rendered after being disabled
         AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2
-        -- print('Currency Test')
+        for k,v in ipairs(interface.defaults.gear.relicUnlockKeyItems) do
+            if (modifind.searchKeyItemName(v)) then
+                interface.data.progress.gear.relicUnlocks[k] = 1;
+            end
+        end
         check = false;
     end
     imgui.BeginTable('relic gear has', 5, ImGuiTableFlags_Borders);
@@ -1648,12 +1669,20 @@ function manager.DisplayRelicGear()
         end
     end
     imgui.EndTable();
+    imgui.NewLine();
+    imgui.TextColored(interface.colors.header, 'Relic Unlocks (+3):    ');
+    for k,v in ipairs(interface.defaults.jobsabrv) do
+        if (interface.data.progress.gear.relicUnlocks[k]) then
+            imgui.SameLine();imgui.TextColored(interface.colors.green,v .. ' ');
+        else
+            imgui.SameLine();imgui.Text(v .. ' ');
+        end
+    end
+    imgui.TextColored(interface.colors.header, 'Progress: ');imgui.SameLine();imgui.ProgressBar(interface.data.progress.gear.relicProgress[1]);
     if (imgui.Button('Update Relic Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Relic Gear'));
         manager.UpdateRelicGear();
     end
-    imgui.SameLine();
-    imgui.ProgressBar(interface.data.progress.gear.relicProgress[1]);
 end
 
 function manager.DisplayRelicGearNeed()
@@ -1872,12 +1901,12 @@ function manager.DisplayRelicGearNeed()
         end
     imgui.EndTable();
 
-    imgui.Spacing();
+    imgui.NewLine();
     imgui.Text('Est. Needed Gil for Guild Items:  ');imgui.SameLine();imgui.TextColored(interface.colors.header, manager.comma_value(manager.guilditemsgil));
     imgui.Text('Est. Needed Plasm:  ');imgui.SameLine();imgui.TextColored(interface.colors.header, manager.comma_value(manager.plasm));imgui.SameLine();
     imgui.Text('(curr: ' .. manager.comma_value(interface.data.current['Plasm'][1]) .. ')')
 
-    imgui.Spacing();
+    imgui.NewLine();
     if (imgui.Button('Update Relic Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Relic Gear'));
         manager.UpdateRelicGear();
@@ -1886,8 +1915,8 @@ function manager.DisplayRelicGearNeed()
 end
 
 function manager.DisplayRelicShardsNeed()
-    local bm = 0 - manager.CountItemId(9539);
-    local km = 0 - manager.CountItemId(9541);
+    local bm = 0 -- modifind.countItemId(9539);
+    local km = 0 -- modifind.countItemId(9541);
 
     imgui.BeginTable('Shards', 12, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();
@@ -1904,24 +1933,26 @@ function manager.DisplayRelicShardsNeed()
         imgui.TextColored(interface.colors.header, 'Legs');imgui.TableNextColumn();
         imgui.TextColored(interface.colors.header, 'Feet');imgui.TableNextColumn();
         for j = 1, #interface.defaults.jobsabrv do
+            -- shards
             imgui.TextColored(interface.colors.header, interface.defaults.jobsabrv[j]);imgui.TableNextColumn();
             for s = 1, #interface.data.progress.gear.relicneed[5][j] do
                 bm = bm + interface.data.progress.gear.relicneed[5][j][s][1];
                 if (interface.data.progress.gear.relicneed[5][j][s][1] >= 5) then
                     imgui.TextColored(interface.colors.error, tostring(interface.data.progress.gear.relicneed[5][j][s][1]));imgui.TableNextColumn();
                 elseif (interface.data.progress.gear.relicneed[5][j][s][1] <= 0) then
-                    imgui.TextColored(interface.colors.text1, tostring(interface.data.progress.gear.relicneed[5][j][s][1]));imgui.TableNextColumn();
+                    imgui.TextColored(interface.colors.green, tostring(interface.data.progress.gear.relicneed[5][j][s][1]));imgui.TableNextColumn();
                 else
                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.relicneed[5][j][s][1]));imgui.TableNextColumn();
                 end
             end
+            --voids
             imgui.TextColored(interface.colors.header, interface.defaults.jobsabrv[j]);imgui.TableNextColumn();
             for v = 1, #interface.data.progress.gear.relicneed[5][j] do
                 km = km + interface.data.progress.gear.relicneed[5][j][v][2];
                 if (interface.data.progress.gear.relicneed[5][j][v][2] >= 3) then
                     imgui.TextColored(interface.colors.error, tostring(interface.data.progress.gear.relicneed[5][j][v][2]));
                 elseif (interface.data.progress.gear.relicneed[5][j][v][2] <= 0) then
-                    imgui.TextColored(interface.colors.text1, tostring(interface.data.progress.gear.relicneed[5][j][v][2]));
+                    imgui.TextColored(interface.colors.green, tostring(interface.data.progress.gear.relicneed[5][j][v][2]));
                 else
                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.relicneed[5][j][v][2]));
                 end
@@ -1934,9 +1965,10 @@ function manager.DisplayRelicShardsNeed()
     imgui.EndTable();
 
     imgui.Separator();
-
-    imgui.Text('Needed Beastmen\'s Medals:  ' .. bm);
-    imgui.Text('Needed Kindred\'s Medals:  ' .. km);
+    
+    -- No longer displaying needed medals as the shard prices have dropped
+    -- imgui.Text('Needed Beastmen\'s Medals:  ' .. bm);
+    -- imgui.Text('Needed Kindred\'s Medals:  ' .. km);
 
     if (imgui.Button('Update Relic Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Relic Gear'));
@@ -1945,18 +1977,27 @@ function manager.DisplayRelicShardsNeed()
 end
 
 function manager.UpdateEmpyGear()
+    --one time count of empy unlock KI's, also set global check to false for safety of not spamming currency packets accidently
+    for k,v in ipairs(interface.defaults.gear.empyUnlockKeyItems) do
+        if (modifind.searchKeyItemName(v)) then
+            interface.data.progress.gear.empyUnlocks[k] = true;
+        end
+    end
+    check = false;
+
     local countgear = 0;
     local totalgear = #interface.defaults.gear.empyrean * #interface.defaults.gear.empyrean[1] * #interface.defaults.gear.empyrean[1][1];
-    for a = 1, #interface.defaults.gear.empyrean do
-        for b = 1, #interface.defaults.gear.empyrean[a] do
-            for c = #interface.defaults.gear.empyrean[a][b], interface.data.progress.gear.empyrean[a][b][1], -1  do --checks from highest to lowest in case have random NQ in storage would give false positive modifind.search 
-                if c < 1 then break end;
-                if (modifind.search(interface.defaults.gear.empyrean[a][b][c]) == true) then
-                    interface.data.progress.gear.empyrean[a][b][1] = c;
-                    break;
+    for job = 1, #interface.defaults.gear.empyrean do
+        for slot = 1, #interface.defaults.gear.empyrean[job] do
+            local index = modifind.searchIdTable(interface.defaults.gear.empyrean[job][slot]:reverse());
+            if (index) then
+                if job == 21 or job == 22 then
+                    interface.data.progress.gear.empyrean[job][slot][1] = index + 3;--offset for geo and run for gear starting at 109
+                else
+                    interface.data.progress.gear.empyrean[job][slot][1] = index;
                 end
             end
-            countgear = countgear + interface.data.progress.gear.empyrean[a][b][1];
+            countgear = countgear + interface.data.progress.gear.empyrean[job][slot][1];
         end
     end
     interface.data.progress.gear.empyProgress[1] = countgear/totalgear;
@@ -1994,15 +2035,15 @@ function manager.CountEmpyGearInv(items)
             slot3 = 3227;
             slot4 = 3229;
         end
-        items[1][y][1] = 0 - manager.CountItemId(slot1); --count stones
-        items[1][y][2] = 0 - manager.CountItemId(slot2); --count jewels
-        items[1][y][3] = 0 - manager.CountItemId(slot3); --count coins
-        items[1][y][4] = 0 - manager.CountItemId(slot4); --count cards
+        items[1][y][1] = 0 - modifind.countItemId(slot1); --count stones
+        items[1][y][2] = 0 - modifind.countItemId(slot2); --count jewels
+        items[1][y][3] = 0 - modifind.countItemId(slot3); --count coins
+        items[1][y][4] = 0 - modifind.countItemId(slot4); --count cards
     end
 
     --count NM items
     for i = 3, #items[2][1] do
-        items[2][1][i] = items[2][1][i] - manager.CountItemId(dropids[i-2]);
+        items[2][1][i] = items[2][1][i] - modifind.countItemId(dropids[i-2]);
     end
 
     return items;
@@ -2179,23 +2220,40 @@ function manager.CountEmpyGear()
 end
 
 function manager.DisplayEmpyGear()
+    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
+        for k,v in ipairs(interface.defaults.gear.empyUnlockKeyItems) do
+            if (modifind.searchKeyItemName(v)) then
+                interface.data.progress.gear.empyUnlocks[k] = 1;
+            end
+        end
+        check = false;
+    end
+
     imgui.BeginTable('empy gear has', 5, ImGuiTableFlags_Borders);
     for a = 1, #interface.data.progress.gear.empyrean do
         for b = 1, #interface.data.progress.gear.empyrean[a] do
             imgui.TableNextColumn();
             local temp = {interface.data.progress.gear.empyrean[a][b][1]};
-            if (imgui.Combo(interface.data.progress.gear.empyrean[a][b][2], temp, 'None\0NQ\0+1\0+2\0lv109\0lv119+1\0lv119+2\0')) then
+            if (imgui.Combo(interface.data.progress.gear.empyrean[a][b][2], temp, 'None\0NQ\0+1\0+2\0lv109\0lv119+1\0lv119+2\0lv119+3\0')) then
                 interface.data.progress.gear.empyrean[a][b][1] = temp[1];
             end
         end
     end
     imgui.EndTable();
+    imgui.NewLine();
+    imgui.TextColored(interface.colors.header, 'Sortie Unlocks (+3):    ');
+    for k,v in ipairs(interface.defaults.jobsabrv) do
+        if (interface.data.progress.gear.empyUnlocks[k]) then
+            imgui.SameLine();imgui.TextColored(interface.colors.green,v .. ' ');
+        else
+            imgui.SameLine();imgui.Text(v .. ' ');
+        end
+    end
+    imgui.TextColored(interface.colors.header, 'Progress: ');imgui.SameLine();imgui.ProgressBar(interface.data.progress.gear.empyProgress[1]);
     if (imgui.Button('Update Empy Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Empyrean Gear'));
         interface.manager.UpdateEmpyGear();
     end
-    imgui.SameLine();
-    imgui.ProgressBar(interface.data.progress.gear.empyProgress[1]);
 end
 
 function manager.DisplayEmpyBaseGearNeed()
@@ -2466,16 +2524,16 @@ function manager.DisplayEmpyReforgedGearNeed()
 end
 
 function manager.UpdateAmbuGear()
-    for a = 1, #interface.defaults.gear.ambu do
-        for b = 1, #interface.defaults.gear.ambu[a] do
+    for set = 1, #interface.defaults.gear.ambu do
+        for slot = 1, #interface.defaults.gear.ambu[set] do
             local count = 1;
-            if interface.data.progress.gear.ambu[a][b][1] == #interface.defaults.gear.ambu[a][b] then
-                count = #interface.defaults.gear.ambu[a][b] + 1;
-            elseif interface.data.progress.gear.ambu[a][b][1] == 0 then
-            else count = interface.data.progress.gear.ambu[a][b][1] end
-            for c = 1, #interface.defaults.gear.ambu[a][b] do
-                if (modifind.search(interface.defaults.gear.ambu[a][b][c])) then
-                    interface.data.progress.gear.ambu[a][b][1] = c;
+            if interface.data.progress.gear.ambu[set][slot][1] == #interface.defaults.gear.ambu[set][slot] then
+                count = #interface.defaults.gear.ambu[set][slot] + 1;
+            elseif interface.data.progress.gear.ambu[set][slot][1] == 0 then
+            else count = interface.data.progress.gear.ambu[set][slot][1] end
+            for c = 1, #interface.defaults.gear.ambu[set][slot] do
+                if (modifind.searchId(interface.defaults.gear.ambu[set][slot][c])) then
+                    interface.data.progress.gear.ambu[set][slot][1] = c;
                 end
             end
         end
@@ -2483,7 +2541,7 @@ function manager.UpdateAmbuGear()
 end
 
 function manager.DisplayAmbuGear()
-    imgui.Spacing();imgui.Spacing();
+    imgui.BeginTable('ambu gear has', 5, ImGuiTableFlags_Borders);
     for a = 1, #interface.data.progress.gear.ambu do
         for b = 1, #interface.data.progress.gear.ambu[a] do
             imgui.TableNextColumn();
@@ -2492,16 +2550,17 @@ function manager.DisplayAmbuGear()
                 interface.data.progress.gear.ambu[a][b][1] = temp[1];
             end
             if a == 5 then
-                imgui.Spacing();imgui.Spacing();imgui.Separator();imgui.Spacing();imgui.Spacing();
+                imgui.NewLine();imgui.Separator();imgui.NewLine();
             end
         end
     end
+    imgui.EndTable();
 end
 
 function manager.DisplayAmbuGearNeed()
     local headvouchers = 0;local bodyvouchers = 0;local handvouchers = 0;local legvouchers = 0;local feetvouchers = 0;local headtokens = 0;local bodytokens = 0;local handtokens = 0;local legtokens = 0;local feettokens = 0;
-    local countmetals = manager.CountItemId(9270);
-    local countfibers = manager.CountItemId(9271);
+    local countmetals = modifind.countItemId(9270);
+    local countfibers = modifind.countItemId(9271);
     interface.data.progress.gear.ambuProgress[1] = 0.0;
     local metals = 0;
     local fibers = 0;
@@ -2563,14 +2622,11 @@ function manager.DisplayAmbuGearNeed()
         fibers = fibers - countfibers;
     end
 
-    imgui.BeginTable('ambu gear summary table', 1);
-        imgui.TableNextRow();imgui.TableNextColumn();
-        imgui.TextColored(interface.colors.text1, 'Total AMBU Gear Completion:');imgui.ShowHelp('Inaccurate but close, quick progress calc based on remaining metals/fibers needed');imgui.TableNextColumn();
-        imgui.ProgressBar(interface.data.progress.gear.ambuProgress[1]);imgui.TableNextColumn();
-    imgui.EndTable();
+    imgui.NewLine();imgui.NewLine();imgui.Separator();imgui.NewLine();imgui.NewLine();
 
-    imgui.Spacing();imgui.Spacing();
-
+    imgui.TextColored(interface.colors.green, 'Total AMBU Gear Completion:');imgui.ShowHelp('Inaccurate but close, quick progress calc based on remaining metals/fibers needed');
+    imgui.ProgressBar(interface.data.progress.gear.ambuProgress[1]);
+    imgui.NewLine();imgui.NewLine();
     imgui.BeginTable('ambu gear need', 6, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Ambu Gear Slips Need:');
@@ -2609,7 +2665,7 @@ function manager.DisplayAmbuGearNeed()
         imgui.TableNextColumn();imgui.Text('Abdhaljs Fibers:');
         imgui.TableNextColumn();imgui.Text(tostring(fibers));
     imgui.EndTable();
-
+    imgui.NewLine();
     if (imgui.Button('Update Ambu Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Ambuscade Gear'));
         interface.manager.UpdateAmbuGear();
@@ -2642,11 +2698,11 @@ function manager.DisplayScaleGear()
                                     imgui.TextColored(interface.colors.warning, 'Rank: ' .. tostring(interface.data.progress.gear.unm.scale[i][5]));
                                     imgui.TableNextColumn();
                                     if interface.data.progress.gear.unm.scale[i][5] == 0 then
-                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - manager.CountItemId(4086) +1;
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6] - manager.CountItemId(4086) +1));
+                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086) +1;
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086) +1));
                                     else
-                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - manager.CountItemId(4086);
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6] - manager.CountItemId(4086)));
+                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086);
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086)));
                                     end
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.scale[i][7];
@@ -2654,8 +2710,8 @@ function manager.DisplayScaleGear()
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     imgui.TableNextColumn();
-                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - manager.CountItemId(4086) +1;
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6]- manager.CountItemId(4086) +1));
+                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086) +1;
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6]- modifind.countItemId(4086) +1));
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.scale[i][7];
                                     imgui.TextColored(interface.colors.warning, tostring(manager.comma_value(interface.data.progress.gear.unm.scale[i][7])));
@@ -2666,7 +2722,6 @@ function manager.DisplayScaleGear()
                 imgui.EndChild();
 
                 imgui.BeginChild('bottomscaleworking', { 0, -imgui.GetFrameHeightWithSpacing(), }, true);
-                    imgui.Spacing();imgui.Spacing();imgui.Spacing();imgui.Spacing();
                     imgui.BeginTable('scale gear working totals', 5, ImGuiTableFlags_Borders);
                         imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TableNextColumn();imgui.TableNextColumn();
                         imgui.TextColored(interface.colors.header, '      Working Totals');imgui.TableNextColumn();
@@ -2698,12 +2753,12 @@ function manager.DisplayScaleGear()
                                     local display = 'Rank: ' .. tostring(interface.data.progress.gear.unm.scale[i][5]);
                                     imgui.TextColored(interface.colors.warning, display);
                                     imgui.TableNextColumn();
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6]- manager.CountItemId(4086)));
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6]- modifind.countItemId(4086)));
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     interface.data.progress.gear.unm.scale[i][6] = 1191;
                                     imgui.TableNextColumn();
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6]- manager.CountItemId(4086)));
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6]- modifind.countItemId(4086)));
                                 end
                             end
                         end
@@ -2723,7 +2778,7 @@ function manager.DisplayScaleGear()
                                 imgui.TableNextColumn();
                                 imgui.Checkbox(interface.data.progress.gear.unm.scale[i][1], track);imgui.TableNextColumn();
                                 interface.data.progress.gear.unm.scale[i][2] = track[1];
-                                imgui.TextColored(interface.colors.text1, 'COMPLETED');
+                                imgui.TextColored(interface.colors.green, 'COMPLETED');
                                 imgui.TableNextColumn();
                             end
                         end
@@ -2759,16 +2814,16 @@ function manager.UpdateScaleGear()
         if interface.data.progress.gear.unm.scale[x][3] == true then
             --temp
         elseif interface.data.progress.gear.unm.scale[x][4] == false then--force update if HQ not owned
-            interface.data.progress.gear.unm.scale[x][4] = manager.CheckItemId(interface.defaults.gear.unm.scale[x][2]);
+            interface.data.progress.gear.unm.scale[x][4] = modifind.searchId(interface.defaults.gear.unm.scale[x][2]);
             if interface.data.progress.gear.unm.scale[x][4] == true then
-                interface.data.progress.gear.unm.scale[x][5] = manager.CheckItemRankInfo(interface.defaults.gear.unm.scale[x][2]);
+                interface.data.progress.gear.unm.scale[x][5] = modifind.checkItemRankInfo(interface.defaults.gear.unm.scale[x][2]);
                 if interface.data.progress.gear.unm.scale[x][5] == 15 then
                     interface.data.progress.gear.unm.scale[x][3] = true;
                 end
             end
         else
             --update Rank
-            interface.data.progress.gear.unm.scale[x][5] = manager.CheckItemRankInfo(interface.defaults.gear.unm.scale[x][2]);
+            interface.data.progress.gear.unm.scale[x][5] = modifind.checkItemRankInfo(interface.defaults.gear.unm.scale[x][2]);
             if interface.data.progress.gear.unm.scale[x][5] == 15 then
                 interface.data.progress.gear.unm.scale[x][3] = true;
                 interface.data.progress.gear.unm.scale[x][6] = 0;
@@ -2818,11 +2873,11 @@ function manager.DisplayHideGear()
                                     imgui.TextColored(interface.colors.warning, 'Rank: ' .. tostring(interface.data.progress.gear.unm.hide[i][5]));
                                     imgui.TableNextColumn();
                                     if interface.data.progress.gear.unm.hide[i][5] == 0 then
-                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - manager.CountItemId(4087) +1;
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6] - manager.CountItemId(4087) +1));
+                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087) +1;
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087) +1));
                                     else
-                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - manager.CountItemId(4087);
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6] - manager.CountItemId(4087)));
+                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087);
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087)));
                                     end
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.hide[i][7];
@@ -2830,8 +2885,8 @@ function manager.DisplayHideGear()
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     imgui.TableNextColumn();
-                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - manager.CountItemId(4087) +1;
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6]- manager.CountItemId(4087) +1));
+                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087) +1;
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6]- modifind.countItemId(4087) +1));
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.hide[i][7];
                                     imgui.TextColored(interface.colors.warning, tostring(manager.comma_value(interface.data.progress.gear.unm.hide[i][7])));
@@ -2842,7 +2897,6 @@ function manager.DisplayHideGear()
                 imgui.EndChild();
 
                 imgui.BeginChild('bottomhideworking', { 0, -imgui.GetFrameHeightWithSpacing(), }, true);
-                    imgui.Spacing();imgui.Spacing();imgui.Spacing();imgui.Spacing();
                     imgui.BeginTable('hide gear working totals', 5, ImGuiTableFlags_Borders);
                         imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TableNextColumn();imgui.TableNextColumn();
                         imgui.TextColored(interface.colors.header, '      Working Totals');imgui.TableNextColumn();
@@ -2874,12 +2928,12 @@ function manager.DisplayHideGear()
                                     local display = 'Rank: ' .. tostring(interface.data.progress.gear.unm.hide[i][5]);
                                     imgui.TextColored(interface.colors.warning, display);
                                     imgui.TableNextColumn();
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6]- manager.CountItemId(4087)));
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6]- modifind.countItemId(4087)));
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     interface.data.progress.gear.unm.hide[i][6] = 1191;
                                     imgui.TableNextColumn();
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6]- manager.CountItemId(4087)));
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6]- modifind.countItemId(4087)));
                                 end
                             end
                         end
@@ -2899,7 +2953,7 @@ function manager.DisplayHideGear()
                                 imgui.TableNextColumn();
                                 imgui.Checkbox(interface.data.progress.gear.unm.hide[i][1], track);imgui.TableNextColumn();
                                 interface.data.progress.gear.unm.hide[i][2] = track[1];
-                                imgui.TextColored(interface.colors.text1, 'COMPLETED');
+                                imgui.TextColored(interface.colors.green, 'COMPLETED');
                                 imgui.TableNextColumn();
                             end
                         end
@@ -2935,16 +2989,16 @@ function manager.UpdateHideGear()
         if interface.data.progress.gear.unm.hide[x][3] == true then
             --temp
         elseif interface.data.progress.gear.unm.hide[x][4] == false then--force update if HQ not owned
-            interface.data.progress.gear.unm.hide[x][4] = manager.CheckItemId(interface.defaults.gear.unm.hide[x][2]);
+            interface.data.progress.gear.unm.hide[x][4] = modifind.searchId(interface.defaults.gear.unm.hide[x][2]);
             if interface.data.progress.gear.unm.hide[x][4] == true then
-                interface.data.progress.gear.unm.hide[x][5] = manager.CheckItemRankInfo(interface.defaults.gear.unm.hide[x][2]);
+                interface.data.progress.gear.unm.hide[x][5] = modifind.checkItemRankInfo(interface.defaults.gear.unm.hide[x][2]);
                 if interface.data.progress.gear.unm.hide[x][5] == 15 then
                     interface.data.progress.gear.unm.hide[x][3] = true;
                 end
             end
         else
             --update Rank
-            interface.data.progress.gear.unm.hide[x][5] = manager.CheckItemRankInfo(interface.defaults.gear.unm.hide[x][2]);
+            interface.data.progress.gear.unm.hide[x][5] = modifind.checkItemRankInfo(interface.defaults.gear.unm.hide[x][2]);
             if interface.data.progress.gear.unm.hide[x][5] == 15 then
                 interface.data.progress.gear.unm.hide[x][3] = true;
                 interface.data.progress.gear.unm.hide[x][6] = 0;
@@ -2994,11 +3048,11 @@ function manager.DisplayWingGear()
                                     imgui.TextColored(interface.colors.warning, 'Rank: ' .. tostring(interface.data.progress.gear.unm.wing[i][5]));
                                     imgui.TableNextColumn();
                                     if interface.data.progress.gear.unm.wing[i][5] == 0 then
-                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - manager.CountItemId(4088) +1;
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6] - manager.CountItemId(4088) +1));
+                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088) +1;
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088) +1));
                                     else
-                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - manager.CountItemId(4088);
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6] - manager.CountItemId(4088)));
+                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088);
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088)));
                                     end
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.wing[i][7];
@@ -3006,8 +3060,8 @@ function manager.DisplayWingGear()
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     imgui.TableNextColumn();
-                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - manager.CountItemId(4088) +1;
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6]- manager.CountItemId(4088) +1));
+                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088) +1;
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6]- modifind.countItemId(4088) +1));
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.wing[i][7];
                                     imgui.TextColored(interface.colors.warning, tostring(manager.comma_value(interface.data.progress.gear.unm.wing[i][7])));
@@ -3018,7 +3072,6 @@ function manager.DisplayWingGear()
                 imgui.EndChild();
 
                 imgui.BeginChild('bottomwingworking', { 0, -imgui.GetFrameHeightWithSpacing(), }, true);
-                    imgui.Spacing();imgui.Spacing();imgui.Spacing();imgui.Spacing();
                     imgui.BeginTable('wing gear working totals', 5, ImGuiTableFlags_Borders);
                         imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TableNextColumn();imgui.TableNextColumn();
                         imgui.TextColored(interface.colors.header, '      Working Totals');imgui.TableNextColumn();
@@ -3050,12 +3103,12 @@ function manager.DisplayWingGear()
                                     local display = 'Rank: ' .. tostring(interface.data.progress.gear.unm.wing[i][5]);
                                     imgui.TextColored(interface.colors.warning, display);
                                     imgui.TableNextColumn();
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6]- manager.CountItemId(4088)));
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6]- modifind.countItemId(4088)));
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     interface.data.progress.gear.unm.wing[i][6] = 1191;
                                     imgui.TableNextColumn();
-                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6]- manager.CountItemId(4088)));
+                                    imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6]- modifind.countItemId(4088)));
                                 end
                             end
                         end
@@ -3075,7 +3128,7 @@ function manager.DisplayWingGear()
                                 imgui.TableNextColumn();
                                 imgui.Checkbox(interface.data.progress.gear.unm.wing[i][1], track);imgui.TableNextColumn();
                                 interface.data.progress.gear.unm.wing[i][2] = track[1];
-                                imgui.TextColored(interface.colors.text1, 'COMPLETED');
+                                imgui.TextColored(interface.colors.green, 'COMPLETED');
                                 imgui.TableNextColumn();
                             end
                         end
@@ -3111,16 +3164,16 @@ function manager.UpdateWingGear()
         if interface.data.progress.gear.unm.wing[x][3] == true then
             --temp
         elseif interface.data.progress.gear.unm.wing[x][4] == false then--force update if HQ not owned
-            interface.data.progress.gear.unm.wing[x][4] = manager.CheckItemId(interface.defaults.gear.unm.wing[x][2]);
+            interface.data.progress.gear.unm.wing[x][4] = modifind.searchId(interface.defaults.gear.unm.wing[x][2]);
             if interface.data.progress.gear.unm.wing[x][4] == true then
-                interface.data.progress.gear.unm.wing[x][5] = manager.CheckItemRankInfo(interface.defaults.gear.unm.wing[x][2]);
+                interface.data.progress.gear.unm.wing[x][5] = modifind.checkItemRankInfo(interface.defaults.gear.unm.wing[x][2]);
                 if interface.data.progress.gear.unm.wing[x][5] == 15 then
                     interface.data.progress.gear.unm.wing[x][3] = true;
                 end
             end
         else
             --update Rank
-            interface.data.progress.gear.unm.wing[x][5] = manager.CheckItemRankInfo(interface.defaults.gear.unm.wing[x][2]);
+            interface.data.progress.gear.unm.wing[x][5] = modifind.checkItemRankInfo(interface.defaults.gear.unm.wing[x][2]);
             if interface.data.progress.gear.unm.wing[x][5] == 15 then
                 interface.data.progress.gear.unm.wing[x][3] = true;
                 interface.data.progress.gear.unm.wing[x][6] = 0;
@@ -3144,6 +3197,31 @@ function manager.UpdateWingGear()
     end
 end
 
+function manager.DisplaySheolAGear();
+
+end
+
+function manager.UpdateSheolAGear();
+
+end
+
+function manager.DisplaySheolBGear();
+
+end
+
+function manager.UpdateSheolBGear();
+
+end
+
+function manager.DisplaySheolCGear();
+
+end
+
+function manager.UpdateSheolCGear();
+
+end
+
+-- this update all gear function not currently used
 function manager.UpdateGear()
 	manager.UpdateAmbuGear();
     manager.UpdateEmpyGear();
@@ -3159,9 +3237,9 @@ function manager.DisplayHallmarks()
         end
     end
 
-    imgui.Spacing();
+    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'NEEDED HALLMARK POINTS:');imgui.SameLine();imgui.Text('    ' .. interface.manager.comma_value(total) .. '    ');
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
 
     imgui.BeginTable('Weps', 8, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Wep Items');imgui.TableNextRow();imgui.TableNextColumn(); 
@@ -3194,9 +3272,7 @@ function manager.DisplayHallmarks()
                 imgui.Text(tostring(interface.manager.comma_value(interface.data.points.hallmarks.matters[2])));
             end
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
-    
+    imgui.NewLine();
     imgui.BeginTable('Capes', 10, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Cape Items');imgui.TableNextRow();imgui.TableNextColumn();
         imgui.Checkbox('Threads(40)', interface.data.points.hallmarks.threads);imgui.TableNextColumn();
@@ -3230,9 +3306,7 @@ function manager.DisplayHallmarks()
                 imgui.Text(tostring(interface.manager.comma_value(interface.data.points.hallmarks.resins[2])));
             end
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
-    
+    imgui.NewLine();
     imgui.BeginTable('DynaCurrency', 6, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Dyna Currency');imgui.TableNextRow();imgui.TableNextColumn();
         imgui.Checkbox('1 Byne(150)', interface.data.points.hallmarks.bynes1);imgui.TableNextColumn();
@@ -3272,9 +3346,7 @@ function manager.DisplayHallmarks()
                 imgui.Text(tostring(interface.manager.comma_value(interface.data.points.hallmarks.shells2[2])));
             end
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
-    
+    imgui.NewLine();
     imgui.BeginTable('MISC', 8, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'MISC');imgui.TableNextRow();imgui.TableNextColumn();
         imgui.Checkbox('Marrows(2)', interface.data.points.hallmarks.marrows);imgui.TableNextColumn();
@@ -3302,9 +3374,7 @@ function manager.DisplayHallmarks()
                 imgui.Text(tostring(interface.manager.comma_value(interface.data.points.hallmarks.cinders[2])));
             end
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
-    
+    imgui.NewLine();
     imgui.BeginTable('ROCKS', 6, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'ROCKS');imgui.TableNextRow();imgui.TableNextColumn();
         imgui.Checkbox('Plutons(500)', interface.data.points.hallmarks.plutons);imgui.TableNextColumn();
@@ -3355,9 +3425,9 @@ function manager.DisplayGallantry()
         end
     end
 
-    imgui.Spacing();
+    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'NEEDED GALLANTRY POINTS:');imgui.SameLine();imgui.Text('    ' .. interface.manager.comma_value(total));
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
+    imgui.NewLine();imgui.Separator();imgui.NewLine();
 
     imgui.BeginTable('Weps', 8, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Wep Items');imgui.TableNextRow();imgui.TableNextColumn();
@@ -3390,9 +3460,7 @@ function manager.DisplayGallantry()
                 imgui.Text(tostring(interface.manager.comma_value(interface.data.points.gallantry.matters[2])));
             end
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
-    
+    imgui.NewLine();
     imgui.BeginTable('Capes', 12, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Cape Items');imgui.TableNextRow();imgui.TableNextColumn();
         imgui.Checkbox('Threads(20)', interface.data.points.gallantry.threads);imgui.TableNextColumn();
@@ -3432,8 +3500,7 @@ function manager.DisplayGallantry()
                 imgui.Text(tostring(interface.manager.comma_value(interface.data.points.gallantry.needles[2])));
             end
     imgui.EndTable();
-
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
+    imgui.NewLine();imgui.NewLine();imgui.Separator();imgui.NewLine();imgui.NewLine();
     local month = {interface.data.points.gallantry.month[1],};
     if (imgui.Combo('Pick the current gallantry month', month, ' \0Relic\0Mythic\0Empyrean\0')) then
         if (month[1] == 0) then
@@ -3458,8 +3525,7 @@ function manager.DisplayGallantry()
             interface.data.points.gallantry.drosses[1] = false;interface.data.points.gallantry.cinders[1] = false;interface.data.points.gallantry.hmp[1] = false;interface.data.points.gallantry.boulders[1] = false;
         end
     end
-    imgui.Spacing();imgui.Separator();imgui.Spacing();
-    
+    imgui.NewLine();imgui.NewLine();
     if (interface.data.points.gallantry.month[1] == 1) then
         imgui.BeginTable('Relics', 6, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Relics');imgui.TableNextRow();imgui.TableNextColumn();
@@ -3656,6 +3722,7 @@ end
 
 function manager.PacketInCurrency2(e)
     interface.data.current['Plasm'][1] = struct.unpack("I", e.data, 0x14)/256;
+    interface.data.current['Gallimaufry'][1] = struct.unpack("I", e.data, 0x90)/256;
 end
 
 function manager.comma_value(n) --credit--http://richard.warburton.it
@@ -3664,7 +3731,10 @@ function manager.comma_value(n) --credit--http://richard.warburton.it
 end
 
 function manager.Test()
-    print(tostring(manager.CheckItemRankInfo(18573)));
+    -- AshitaCore:GetChatManager():QueueCommand(-1, '/db reset');
+    local myIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
+	local my = GetEntity(myIndex);
+    -- print(tostring(my.Race))
 end
 
 return manager;

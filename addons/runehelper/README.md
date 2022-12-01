@@ -11,6 +11,7 @@ Very straight forward to use, commands are:
 Credit to Thorny for his gData.GetBuffCount function from the luashitacast addon, I modified it for my use case.
 
 ## To-Do's
-I might add valliance/valation use to this at some point in the future
 
-General code clean up
+- I might add valliance/valation use to this at some point in the future
+
+- General code clean up

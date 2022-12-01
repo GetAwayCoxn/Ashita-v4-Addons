@@ -8,8 +8,8 @@ interface = T{
         error = { 1.0, 0.4, 0.4, 1.0 },
         header = { 1.0, 0.65, 0.26, 1.0 },
         warning = { 0.9, 0.9, 0.0, 1.0 },
-        text1 = { 0.2, 0.9, 0.0, 1.0 }, --bright green
-        text2 = { 0.5, 0.9, 1.0, 1.0 }, --light blue
+        green = { 0.2, 0.9, 0.0, 1.0 }, --bright green
+        blue = { 0.5, 0.9, 1.0, 1.0 }, --light blue
     },
 };
 
@@ -41,67 +41,32 @@ function interface.RenderWeaponsTab()
         imgui.BeginChild('WeaponsPane', { 0, -imgui.GetFrameHeightWithSpacing(), }, true);
             if (imgui.BeginTabBar('weapons_tabbar', ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)) then
                 if (imgui.BeginTabItem('RELICS', nil)) then
-
                     interface.manager.DisplayRelics();
-
-                    if (imgui.Button('Update Relics')) then
-                        print(chat.header(addon.name) .. chat.message('Updating Relic Weapons'));
-                        interface.manager.UpdateRelics();
-                    end
                 imgui.EndTabItem();
                 end
 
                 if (imgui.BeginTabItem('MYTHICS', nil)) then
-
                     interface.manager.DisplayMythics();
-
-                    if (imgui.Button('Update Mythics')) then
-                        print(chat.header(addon.name) .. chat.message('Updated Mythic Weapons'));
-                        interface.manager.UpdateMythics();
-                    end
                 imgui.EndTabItem();
                 end
 
                 if (imgui.BeginTabItem('EMPYREANS', nil)) then
-                    imgui.Spacing();imgui.Spacing();
-
                     interface.manager.DisplayEmpyreans();
-                    
-                    imgui.Spacing();imgui.Spacing();
-                    
-                    interface.manager.DisplayEmpyreanNeeds();
-
-                    if (imgui.Button('Update Empyreans')) then
-                        print(chat.header(addon.name) .. chat.message('Updated Empyrean Weapons'));
-                        interface.manager.UpdateEmpyreans();
-                    end
                 imgui.EndTabItem();
                 end
 
                 if (imgui.BeginTabItem('ERGONS', nil)) then
-                    
                     interface.manager.DisplayErgons();
+                imgui.EndTabItem();
+                end
 
-                    if (imgui.Button('Update Ergons')) then
-                        print(chat.header(addon.name) .. chat.message('Updated Ergon Weapons'));
-                        interface.manager.UpdateErgons();
-                    end
+                if (imgui.BeginTabItem('PRIMES', nil)) then
+                    interface.manager.DisplayPrimes();
                 imgui.EndTabItem();
                 end
 
                 if (imgui.BeginTabItem('AMBUSCADE', nil)) then
-                    imgui.Spacing();
-                    imgui.BeginTable('ambu weps table', 1, ImGuiTableFlags_Borders);
-                        interface.manager.DisplayAmbuWeps();
-                    imgui.EndTable();
-                    imgui.Spacing();imgui.Spacing();
-                    imgui.BeginTable('ambu weps need', 6, ImGuiTableFlags_Borders);
-                        interface.manager.DisplayAmbuWepsNeed();
-                    imgui.EndTable();
-                    if (imgui.Button('Update Ambu Weps')) then
-                        print(chat.header(addon.name) .. chat.message('Updated Ambu Weapons'));
-                        interface.manager.UpdateAmbuWeps();
-                    end
+                    interface.manager.DisplayAmbuWeps();
                 imgui.EndTabItem();
                 end
 
@@ -174,14 +139,8 @@ function interface.RenderGearTab()
                 end
 
                 if (imgui.BeginTabItem('AMBUSCADE', nil)) then
-                    imgui.BeginTable('ambu gear has', 5, ImGuiTableFlags_Borders);
-                        interface.manager.DisplayAmbuGear();
-                    imgui.EndTable();
-                    
-                    imgui.Spacing();imgui.Spacing();imgui.Separator();imgui.Spacing();imgui.Spacing();
-                    
+                    interface.manager.DisplayAmbuGear();
                     interface.manager.DisplayAmbuGearNeed();
-                    
                 imgui.EndTabItem();
                 end
 
@@ -200,6 +159,29 @@ function interface.RenderGearTab()
 
                         if (imgui.BeginTabItem('WING', nil)) then
                             interface.manager.DisplayWingGear();
+                        imgui.EndTabItem();
+                        end
+                    imgui.EndTabBar();
+                    end
+                imgui.EndChild();
+                imgui.EndTabItem();
+                end
+
+                if (imgui.BeginTabItem('ODYSSEA', nil)) then
+                imgui.BeginChild('OdyGearPane', { 0, 600, }, true);
+                    if (imgui.BeginTabBar('ody_gear_tabbar', ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)) then
+                        if (imgui.BeginTabItem('SHEOL A', nil)) then
+                            interface.manager.DisplaySheolAGear();
+                        imgui.EndTabItem();
+                        end
+
+                        if (imgui.BeginTabItem('SHEOL B', nil)) then
+                            interface.manager.DisplaySheolBGear();
+                        imgui.EndTabItem();
+                        end
+
+                        if (imgui.BeginTabItem('SHEOL C', nil)) then
+                            interface.manager.DisplaySheolCGear();
                         imgui.EndTabItem();
                         end
                     imgui.EndTabBar();

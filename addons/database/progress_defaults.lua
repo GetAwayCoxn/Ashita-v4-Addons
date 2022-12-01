@@ -48,6 +48,30 @@ progress_defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
                 {'Ochain',0,0},
             },
             empyreansneeds = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}, --{chloris,glavoid,briareus,cara,fistule,kukulkan,iron plates,ulhuadshi,itzpapalotl,sobek,CC lantern,bukhis,sedna,colorless soul,dragua,orthus,apademak,isgebind,alfard,azdaja,HMP,dross,cinder,boulders,crystals}
+            ergons = {
+                {'Epeolatry',false,false,false,false,false,false,false,0},--Epeolatry{Name,broken rapier hilt, vial of crimson catalyst,fight, superlative runic ring of deluge, superlative runic ring of luster, superlative runic ring of vision,Epeolatry,Epeolatryafterglow,Epeolatryaumented}
+                {'Idris',false,false,false,false,false,false,false,0},--Idris{Name,Rusted handbell, emblazoned handbell,fight, ripple prominence concretion,inferno concretion, cyclone concretion,Idris,Idrisafterglow,Idrisaugmented}
+            },
+            ergonNeeds = {26198,8600000,20000,1192},--{bayld,plasm,beitetsu,sad crystals}
+            primes = {--name,level pointer, augment rank
+                {'Prime Fists',0,0},
+                {'Prime Dagger',0,0},
+                {'Prime Sword',0,0},
+                {'Prime Blade',0,0},
+                {'Prime Pickaxe',0,0},
+                {'Prime Great Axe',0,0},
+                {'Prime Scythe',0,0},
+                {'Prime Lance',0,0},
+                {'Genshitanto',0,0},
+                {'Genshito',0,0},
+                {'Prime Maul',0,0},
+                {'Prime Staff',0,0},
+                {'Prime Bow',0,0},
+                {'Prime Gun',0,0},
+                {'Prime Shield',0,0},
+                {'Prime Horn',0,0},
+            },
+            primesneeds = {0,0}, --gallimaufry,Eikondrite
             ambu = {
                 {0,'H2H -- Karambit'},{0,'Dagger -- Tauret'},{0,'Sword -- Naegling'},{0,'GS -- Nandaka'},{0,'Axe -- Dolichenus'},
                 {0,'GA -- Lycurgos'},{0,'Scythe -- Drepanum'},{0,'Polearm -- Shining One'},{0,'Katana -- Gokotai'},{0,'GK -- Hachimonji'},
@@ -55,11 +79,6 @@ progress_defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
             },
             ambuProgress = {0.0,},
             ambuWepItems = {0,0,0,0,0,0}, --voucher,nugget,gem,anima,matter,pulse,
-            ergons = {
-                {'Epeolatry',false,false,false,false,false,false,false,0},--Epeolatry{Name,broken rapier hilt, vial of crimson catalyst,fight, superlative runic ring of deluge, superlative runic ring of luster, superlative runic ring of vision,Epeolatry,Epeolatryafterglow,Epeolatryaumented}
-                {'Idris',false,false,false,false,false,false,false,0},--Idris{Name,Rusted handbell, emblazoned handbell,fight, ripple prominence concretion,inferno concretion, cyclone concretion,Idris,Idrisafterglow,Idrisaugmented}
-            },
-            ergonNeeds = {26198,8600000,20000,1192},--{bayld,plasm,beitetsu,sad crystals}
         },
         gear = {
             af = {
@@ -131,7 +150,7 @@ progress_defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
                         {0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0}},
                 {--119+2,head > feet,{slot mat,S.Faulpie Leather,Cypress Log,Khoma Thread,Azure Leaf,Cyan Coral,Ruthenium Ore,Niobium Ore,}
                     {0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0}},
-                {--119+3,war > run,head > feet,{shard,void,slot}
+                {--119+3,war > run, head > feet,{shard,void,slot}
                     {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},
                     {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},
                     {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},{{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},
@@ -142,6 +161,7 @@ progress_defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
                     {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},},
             },
             relicProgress = {0.0,},
+            relicUnlocks = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false},
 
             empyrean = {
                {{0,'WAR Head'},{0,'WAR Body'},{0,'WAR Hands'},{0,'WAR Legs'},{0,'WAR Feet'}},
@@ -173,6 +193,7 @@ progress_defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
                 {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},-- 109 head > feet; {chapters,slot mat,etched memories}
             },
             empyProgress = {0.0,},
+            empyUnlocks = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false},
 
             ambu = {
                {{0,'S Head'},{0,'S Body'},{0,'S Hands'},{0,'S Legs'},{0,'S Feet'}},
@@ -228,13 +249,14 @@ progress_defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
         ['Beitetsu'] = {10000,10000},--mythic,ergon
         ['Riftborn Boulder'] = {10000,},
         ['Pluton'] = {10000,},
-        ['Relic'] = {'relic',},
-        ['Mythic'] = {'paparoon', 'oboro'},
-        ['Empyrean'] = {'empyrean',},
-        ['Ergon'] = {'ergon',},
+        ['Relic'] = {'Relic',},
+        ['Mythic'] = {'Paparoon', 'Oboro'},
+        ['Empyrean'] = {'Empyrean',},
+        ['Ergon'] = {'Ergon',},
         ['Plasm'] = {0,},
         ['Tokens'] = {0,},
         ['Ichor'] = {0,},
+        ['Gallimaufry'] = {0,},
     },
 
     points = {
