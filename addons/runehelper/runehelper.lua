@@ -118,17 +118,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     if (imgui.Begin('RuneHelper', manager.is_open, ImGuiWindowFlags_NoDecoration)) then
         imgui.TextColored(manager.text_color, 'Use /runehelper or /rh to hide');
 
-        imgui.Spacing();
         local selection1 = {manager.menu_holders[1] + 1};
         if (imgui.Combo('Rune 1', selection1, 'None\0Ignis (Fire/Ice)\0Gellus (Ice/Wind)\0Flabra (Wind/Earth)\0Tellus (Earth/Ltng)\0Sulpor (Ltng/Water)\0Unda (Water/Fire)\0Lux (Light/Dark)\0Tenebrae (Dark/Light)\0')) then
             manager.menu_holders[1] = selection1[1] - 1;
         end
-        imgui.Spacing();
         local selection2 = {manager.menu_holders[2] + 1};
         if (imgui.Combo('Rune 2', selection2, 'None\0Ignis (Fire/Ice)\0Gellus (Ice/Wind)\0Flabra (Wind/Earth)\0Tellus (Earth/Ltng)\0Sulpor (Ltng/Water)\0Unda (Water/Fire)\0Lux (Light/Dark)\0Tenebrae (Dark/Light)\0')) then
             manager.menu_holders[2] = selection2[1] - 1;
         end
-        imgui.Spacing();
         local selection3 = {manager.menu_holders[3] + 1};
         if (imgui.Combo('Rune 3', selection3, 'None\0Ignis (Fire/Ice)\0Gellus (Ice/Wind)\0Flabra (Wind/Earth)\0Tellus (Earth/Ltng)\0Sulpor (Ltng/Water)\0Unda (Water/Fire)\0Lux (Light/Dark)\0Tenebrae (Dark/Light)\0')) then
             manager.menu_holders[3] = selection3[1] - 1;
@@ -136,7 +133,6 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         end
         imgui.ShowHelp('Rune 3 defaults to None if /RUN');
 
-        imgui.Spacing();
         if (imgui.InputInt('Auto Pulse %',manager.pulse)) then
             if (manager.pulse[1] > 100) then manager.pulse[1] = 100;
             elseif (manager.pulse[1] < 0) then manager.pulse[1] = 0 end
@@ -144,7 +140,6 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         end
         imgui.ShowHelp('Requires 3 runes, if all 3 are Tenebrae then this % is for MPP instead of HPP, default to 0 if /RUN');
 
-        imgui.Spacing();
         if (imgui.Button(manager.enabled)) then
             if (manager.enabled == 'Disabled') then
                 manager.enabled = 'Enabled';
