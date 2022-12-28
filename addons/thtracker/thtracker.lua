@@ -1,7 +1,7 @@
 addon.name      = 'thtracker';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.04';
-addon.desc      = 'Tracks TH on mobs, this is not a port';
+addon.version   = '1.05';
+addon.desc      = 'Tracks TH on multiple mobs, this is not a port';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
 require('common');
@@ -157,6 +157,7 @@ ashita.events.register('text_in', 'text_in_cb', function(e)
         end
         
         count = count + countGear(player);
+        if not count or count == 0 then return; end
 
         if target == nil then return end;
         if mobs[index] ~= nil then 
