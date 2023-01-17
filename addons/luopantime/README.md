@@ -8,6 +8,8 @@ No current commands for this addon. Can hold shift to click and drag.
 
 ## To-Do's
 
-Might add the option to play a sound when like 1min left or something for multiboxers
+-Might add the option to play a sound when like 1min left or something for multiboxers
 
-Might add Indi stuff to this too
+-Might add Indi stuff to this too
+
+-Need to add adjustment for gear and not just assume 10min duration always
