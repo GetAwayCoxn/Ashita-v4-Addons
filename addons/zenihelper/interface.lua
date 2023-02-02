@@ -9,7 +9,6 @@ interface = T{
         has = { 0.2, 0.9, 0.0, 0.9 },
         donthas = {0.5, 0.5, 0.5, 0.9 },
     },
-    autotrade = true;--change to false if you dont want to autotrade
     tradetime = os.time();
 };
 function interface.render()
@@ -20,8 +19,8 @@ function interface.render()
     end
     local target = GetEntity(AshitaCore:GetMemoryManager():GetTarget():GetTargetIndex(0));
     
-    if target ~= nil and interface.autotrade then
-        if data.tradeitems:haskey(target.ServerId) and math.sqrt(target.Distance) < 4 and (os.time() - interface.tradetime > 3) then
+    if target ~= nil then
+        if data.tradeitems:haskey(target.ServerId) and math.sqrt(target.Distance) < 5 and (os.time() - interface.tradetime > 3) then
             interface.tradetime = os.time()
             interface.dotrade();
         end
@@ -50,6 +49,9 @@ function interface.render()
 
                 for k,v in pairs(data.items.tinnin.t1) do
                     imgui.TextColored(interface.colors.name, k);
+                    if k == 'Cheese Hoarder Gigiroon' then
+                        imgui.ShowHelp([[Alzadaal Undersea Ruins (F-9) first map]]);
+                    end
                     if v[3] then imgui.TextColored(interface.colors.has, v[1]) else imgui.TextColored(interface.colors.donthas, v[1]) end
                     imgui.SameLine();imgui.Indent(135);imgui.TextColored(interface.colors.name, '|');imgui.SameLine();
                     if v[4] then imgui.TextColored(interface.colors.has, v[2]) else imgui.TextColored(interface.colors.donthas, v[2]) end;
@@ -62,6 +64,9 @@ function interface.render()
 
                 for k,v in pairs(data.items.tinnin.t2) do
                     imgui.TextColored(interface.colors.name, k);
+                    if k == 'Iriz Ima' then
+                        imgui.ShowHelp([[Walk outside to Wajaom Woodlands, then go to J-8]]);
+                    end
                     if v[3] then imgui.TextColored(interface.colors.has, v[1]) else imgui.TextColored(interface.colors.donthas, v[1]) end
                     imgui.SameLine();imgui.Indent(135);imgui.TextColored(interface.colors.name, '|');imgui.SameLine();
                     if v[4] then imgui.TextColored(interface.colors.has, v[2]) else imgui.TextColored(interface.colors.donthas, v[2]) end;
@@ -73,6 +78,7 @@ function interface.render()
                 imgui.Indent(-80.0);
 
                 imgui.TextColored(interface.colors.name, 'Armed Gears');
+                imgui.ShowHelp([[Alzadaal Undersea Ruins (G-11) first map]]);
                 if data.items.tinnin.t3['Armed Gears'][3] then
                     imgui.TextColored(interface.colors.has, data.items.tinnin.t3['Armed Gears'][1]);
                 else 
@@ -90,6 +96,7 @@ function interface.render()
                 imgui.Indent(-80.0);
 
                 imgui.TextColored(interface.colors.name, 'Gotoh Zha the Redolent');
+                imgui.ShowHelp([[Survival Guide to Wajaom Woodlands and Mount to (F-5)]]);
                 if data.items.tinnin.t3['Gotoh Zha the Redolent'][3] then
                     imgui.TextColored(interface.colors.has, data.items.tinnin.t3['Gotoh Zha the Redolent'][1]);
                 else 
@@ -107,6 +114,7 @@ function interface.render()
                 imgui.Indent(-70.0);
 
                 imgui.TextColored(interface.colors.name, 'Dea');
+                imgui.ShowHelp([[Escape from Nyzul Isle or walk outside to Bhaflau Thickets, then go to F-7]]);
                 if data.items.tinnin.t3['Dea'][3] then
                     imgui.TextColored(interface.colors.has, data.items.tinnin.t3['Dea'][1]);
                 else 
@@ -124,6 +132,7 @@ function interface.render()
                 imgui.Indent(-80.0);
 
                 imgui.TextColored(interface.colors.name, 'Tinnin');
+                imgui.ShowHelp('Wajaom Woodlands (H-13) use Unity Warp 135 and a mount');
                 if data.items.tinnin.t4['Tinnin'][3] then
                     imgui.TextColored(interface.colors.has, data.items.tinnin.t4['Tinnin'][1]);
                 else 
@@ -152,6 +161,9 @@ function interface.render()
 
                 for k,v in pairs(data.items.sarameya.t1) do
                     imgui.TextColored(interface.colors.name, k);
+                    if k == 'Ob' then
+                        imgui.ShowHelp([[Alzadaal Undersea Ruins - Bhaflau Remnants Warp, then go to G-7]]);
+                    end
                     if v[3] then imgui.TextColored(interface.colors.has, v[1]) else imgui.TextColored(interface.colors.donthas, v[1]) end
                     imgui.SameLine();imgui.Indent(135);imgui.TextColored(interface.colors.name, '|');imgui.SameLine();
                     if v[4] then imgui.TextColored(interface.colors.has, v[2]) else imgui.TextColored(interface.colors.donthas, v[2]) end;
@@ -164,6 +176,9 @@ function interface.render()
 
                 for k,v in pairs(data.items.sarameya.t2) do
                     imgui.TextColored(interface.colors.name, k);
+                    if k == 'Anantaboga' then
+                        imgui.ShowHelp([[HP warp to Mount Z, then (E-6)]]);
+                    end
                     if v[3] then imgui.TextColored(interface.colors.has, v[1]) else imgui.TextColored(interface.colors.donthas, v[1]) end
                     imgui.SameLine();imgui.Indent(135);imgui.TextColored(interface.colors.name, '|');imgui.SameLine();
                     if v[4] then imgui.TextColored(interface.colors.has, v[2]) else imgui.TextColored(interface.colors.donthas, v[2]) end;
@@ -175,6 +190,20 @@ function interface.render()
                 imgui.Indent(-80.0);
 
                 imgui.TextColored(interface.colors.name, 'Achamoth');
+                imgui.ShowHelp([[Halvung Map 1 (G-4)
+
+Option A:
+
+    Zone in from the Voidwatch warp, the Survival Guide, or Runic portal to (L-7) in Mount Zhayolm and make the long trek to (G-4) on Halvung Map 1.
+
+Option B:
+
+    This allows you to double up and defeat a Dextrose (T2) right before an Achamoth (T3) if you have the pops.
+    Take the Homepoint or Unity 135 warp to Mount Zhayolm and zone in to Halvung at (D-9).
+        Take a left at the fork while entering the tunnel before the zone, and head north, not south.
+    Once in Halvung, take a left at the fork again. Proceed over the 'bridge' over the lava at (F-8), and through the Cast Bronze Gate (just select it, no key required).
+    Keep left and then bare right through another gate at (G-7), drop down the ledge, and then follow the path to the pop for Dextrose at (J-6).
+    From there hug the left and head east until you drop down a ledge. Head up the hill through the gate, and the pop is right in front of you at the fork in the road before the lava bridge.]]);
                 if data.items.sarameya.t3['Achamoth'][3] then
                     imgui.TextColored(interface.colors.has, data.items.sarameya.t3['Achamoth'][1]);
                 else 
@@ -192,6 +221,9 @@ function interface.render()
                 imgui.Indent(-85.0);
                 
                 imgui.TextColored(interface.colors.name, 'Khromasoul Bhurborlor');
+                imgui.ShowHelp([[Mount Zhayolm (G/H-8)
+
+Voidwatch warp to Mount Z and mount, dont go towards Cerb pop]]);
                 if data.items.sarameya.t3['Khromasoul Bhurborlor'][3] then
                     imgui.TextColored(interface.colors.has, data.items.sarameya.t3['Khromasoul Bhurborlor'][1]);
                 else 
@@ -209,6 +241,9 @@ function interface.render()
                 imgui.Indent(-80.0);
 
                 imgui.TextColored(interface.colors.name, 'Nosferatu');
+                imgui.ShowHelp([[Aydeewa Subterrance Map 2 (F-9)
+
+Survival Guide to Aydeewa, then walk to F9]]);
                 if data.items.sarameya.t3['Nosferatu'][3] then
                     imgui.TextColored(interface.colors.has, data.items.sarameya.t3['Nosferatu'][1]);
                 else 
@@ -226,6 +261,9 @@ function interface.render()
                 imgui.Indent(-85.0);
 
                 imgui.TextColored(interface.colors.name, 'Sarameya');
+                imgui.ShowHelp([[Mount Zhayolm (I-10)
+
+Voidwatch warp to Mount Z and mount, dont go towards Cerb pop]]);
                 if data.items.sarameya.t4['Sarameya'][3] then
                     imgui.TextColored(interface.colors.has, data.items.sarameya.t4['Sarameya'][1]);
                 else 
@@ -254,6 +292,11 @@ function interface.render()
 
                 for k,v in pairs(data.items.tyger.t1) do
                     imgui.TextColored(interface.colors.name, k);
+                    if k == 'Chigre' then
+                        imgui.ShowHelp([[Aydeewa Subterrance Map 2 (E-8)
+
+Survival Guide to Aydeewa, then walk]]);
+                    end
                     if v[3] then imgui.TextColored(interface.colors.has, v[1]) else imgui.TextColored(interface.colors.donthas, v[1]) end
                     imgui.SameLine();imgui.Indent(135);imgui.TextColored(interface.colors.name, '|');imgui.SameLine();
                     if v[4] then imgui.TextColored(interface.colors.has, v[2]) else imgui.TextColored(interface.colors.donthas, v[2]) end;
@@ -266,6 +309,9 @@ function interface.render()
 
                 for k,v in pairs(data.items.tyger.t2) do
                     imgui.TextColored(interface.colors.name, k);
+                    if k == 'Wulgaru' then
+                        imgui.ShowHelp([[Alzadaal Undersea Ruins (G-6) first map]]);
+                    end
                     if v[3] then imgui.TextColored(interface.colors.has, v[1]) else imgui.TextColored(interface.colors.donthas, v[1]) end
                     imgui.SameLine();imgui.Indent(135);imgui.TextColored(interface.colors.name, '|');imgui.SameLine();
                     if v[4] then imgui.TextColored(interface.colors.has, v[2]) else imgui.TextColored(interface.colors.donthas, v[2]) end;
@@ -277,6 +323,7 @@ function interface.render()
                 imgui.Indent(-85);
 
                 imgui.TextColored(interface.colors.name, 'Experimental Lamia');
+                imgui.ShowHelp('Caedarva Mire (F-7) survival guide very close');
                 if data.items.tyger.t3['Experimental Lamia'][3] then
                     imgui.TextColored(interface.colors.has, data.items.tyger.t3['Experimental Lamia'][1]);
                 else 
@@ -294,6 +341,7 @@ function interface.render()
                 imgui.Indent(-80);
 
                 imgui.TextColored(interface.colors.name, 'Mahjlaef the Paintorn');
+                imgui.ShowHelp('Caedarva Mire (H-7) use Unity Warp 135 and a mount');
                 if data.items.tyger.t3['Mahjlaef the Paintorn'][3] then
                     imgui.TextColored(interface.colors.has, data.items.tyger.t3['Mahjlaef the Paintorn'][1]);
                 else 
@@ -311,6 +359,7 @@ function interface.render()
                 imgui.Indent(-80);
 
                 imgui.TextColored(interface.colors.name, 'Nuhn');
+                imgui.ShowHelp([[Survival Guide warp to Caedarva Mire, then go to Arrapago Reef, then G-6]]);
                 if data.items.tyger.t3['Nuhn'][3] then
                     imgui.TextColored(interface.colors.has, data.items.tyger.t3['Nuhn'][1]);
                 else 
@@ -328,6 +377,7 @@ function interface.render()
                 imgui.Indent(-70);
 
                 imgui.TextColored(interface.colors.name, 'Tyger');
+                imgui.ShowHelp('Caedarva Mire (H-6) use Unity Warp 135 and a mount');
                 if data.items.tyger.t4['Tyger'][3] then
                     imgui.TextColored(interface.colors.has, data.items.tyger.t4['Tyger'][1]);
                 else 

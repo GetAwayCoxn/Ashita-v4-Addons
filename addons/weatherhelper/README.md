@@ -8,4 +8,4 @@ The only command is:
 
 It will check for both single and double weather matching your choice
 
-It only scans for new weather every 15 seconds
+It scans for new weather every 15 seconds because this doesn't use packets
