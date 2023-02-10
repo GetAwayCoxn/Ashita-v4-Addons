@@ -1,6 +1,6 @@
 addon.name      = 'AutoChecker';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.0';
+addon.version   = '1.1';
 addon.desc      = 'Automatically check mobs as you target them';
 addon.link      = 'https://github.com/GetAwayCoxn/Ashita-v4-Addons';
 
@@ -19,11 +19,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     
     if (area == nil) or (towns:contains(area)) or (AshitaCore:GetMemoryManager():GetParty():GetMemberHPPercent(0) < 1) then
 		active = false;
+        return
 	end
 
     local targetIndex = AshitaCore:GetMemoryManager():GetTarget():GetTargetIndex(0);
+    local myStatus = AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0))
 
-    if not targetIndex or targetIndex == 0 then
+    if not targetIndex or targetIndex == 0 or myStatus == 1 then
         lastMobIndex = 0
         return
     end
