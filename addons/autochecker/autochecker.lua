@@ -1,6 +1,6 @@
 addon.name      = 'AutoChecker';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.1';
+addon.version   = '1.2';
 addon.desc      = 'Automatically check mobs as you target them';
 addon.link      = 'https://github.com/GetAwayCoxn/Ashita-v4-Addons';
 
@@ -14,16 +14,15 @@ local towns = T{'Tavnazian Safehold','Al Zahbi','Aht Urhgan Whitegate','Nashmau'
 ashita.events.register('d3d_present', 'present_cb', function ()
     if not active then return end
 
-    local area = AshitaCore:GetResourceManager():GetString("zones.names", AshitaCore:GetMemoryManager():GetParty():GetMemberZone(0));
-    local player = AshitaCore:GetMemoryManager():GetPlayer();
+    local party = AshitaCore:GetMemoryManager():GetParty();
+    local area = AshitaCore:GetResourceManager():GetString("zones.names", party:GetMemberZone(0));
     
-    if (area == nil) or (towns:contains(area)) or (AshitaCore:GetMemoryManager():GetParty():GetMemberHPPercent(0) < 1) then
-		active = false;
+    if (area == nil) or (towns:contains(area)) or (party:GetMemberHPPercent(0) < 1) then
         return
 	end
 
     local targetIndex = AshitaCore:GetMemoryManager():GetTarget():GetTargetIndex(0);
-    local myStatus = AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0))
+    local myStatus = AshitaCore:GetMemoryManager():GetEntity():GetStatus(party:GetMemberTargetIndex(0))
 
     if not targetIndex or targetIndex == 0 or myStatus == 1 then
         lastMobIndex = 0
@@ -43,7 +42,7 @@ end);
 
 ashita.events.register('command', 'command_cb', function (e)
 	local args = e.command:args();
-    if (#args == 0) or (args[1] ~= '/achecker') then
+    if (#args == 0) or (args[1] ~= '/achecker' and args[1] ~= '/autochecker') then
         return;
     end
 
