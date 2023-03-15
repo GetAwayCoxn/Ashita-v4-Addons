@@ -32,12 +32,12 @@ function interface.render()
 
     imgui.SetNextWindowSize({ 975, 615, });
     imgui.SetNextWindowBgAlpha(interface.bg_alpha);
-    if imgui.IsWindowHovered(ImGuiHoveredFlags_AnyWindow) then
-        if imgui.IsMouseDoubleClicked(ImGuiMouseButton_Left) then
-            interface.is_open[1] = not interface.is_open[1];
-        end
-    end
     if (imgui.Begin('zenihelper', interface.is_open, ImGuiWindowFlags_NoDecoration)) then
+        if imgui.IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows) then
+            if imgui.IsMouseDoubleClicked(ImGuiMouseButton_Left) then
+                interface.is_open[1] = not interface.is_open[1];
+            end
+        end
         imgui.BeginChild('NmPane', { 960, 560 }, true);
             imgui.BeginChild('TinninPane', { 310, 540}, true);
                 imgui.Indent(100.0);

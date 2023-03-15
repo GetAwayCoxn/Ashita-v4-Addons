@@ -1,6 +1,6 @@
 addon.name      = 'zenihelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.02';
+addon.version   = '1.03';
 addon.desc      = 'Track and displays what ZNM pops/trophies/KI\'s you have and assists in popping the NMs at the ???';
 addon.link      = 'https://github.com/GetAwayCoxn/Zeni-Helper';
 
