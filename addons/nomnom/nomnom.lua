@@ -1,6 +1,6 @@
 addon.name      = 'nomnom'
 addon.author    = 'GetAwayCoxn'
-addon.version   = '1.09'
+addon.version   = '1.10'
 addon.desc      = 'Eats food.'
 addon.link      = 'https://github.com/GetAwayCoxn/'
 
@@ -33,34 +33,39 @@ ashita.events.register('load', 'load_cb', function()
     settings.food = FindFood()  -- need to test on first login
 end)
 
-ashita.events.register('d3d_present', 'present_cb', function ()
-    local area = AshitaCore:GetResourceManager():GetString("zones.names", AshitaCore:GetMemoryManager():GetParty():GetMemberZone(0))
+ashita.events.register('d3d_present', 'present_cb', function()
+    local party = AshitaCore:GetMemoryManager():GetParty()
     local player = AshitaCore:GetMemoryManager():GetPlayer()
     local full = false
-    local hp = AshitaCore:GetMemoryManager():GetParty():GetMemberHP(0)
+    local hp =party:GetMemberHP(0)
     now = os.time()
 
     -- Force Disabled under these conditions
-    if player:GetIsZoning() ~= 0 or hp < 25 then
-		settings.enabled = 'Disabled'
+    if player:GetIsZoning() ~= 0 then
+        settings.enabled = 'Disabled'
+        settings.menu_holder = { -1, }
+        currentFood = nil
+        settings.food = FindFood()
         return
-	end
-    
+    end
+    if  hp < 1 then settings.enabled = 'Disabled' end
+
     -- Do Work here if Enabled and before the is_open check
     if settings.enabled == 'Enabled' then
         -- Find out if full already or not and other bad things
         local buffs = AshitaCore:GetMemoryManager():GetPlayer():GetBuffs()
         for _, buff in pairs(buffs) do
             local buffString = AshitaCore:GetResourceManager():GetString("buffs.names", buff)
-			if buffString and buffString == 'Food' and not full then
+            if buffString and buffString == 'Food' and not full then
                 full = true
             end
             if buffString and badBuffs:contains(buffString) then
                 return
             end
         end
+        local status = AshitaCore:GetMemoryManager():GetEntity():GetStatus(party:GetMemberIndex(0))
         --Kick out if no food selected on menu, else eat food since no Food buff found
-        if not full then
+        if not full and status == 0 then
             local function recount()
                 settings.food[settings.menu_holder[1]+1][2] = CountItemName(currentFood)
             end
@@ -96,7 +101,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                 settings.is_open[1] = not settings.is_open[1]
             end
         end
-        imgui.Indent(100)imgui.TextColored(settings.text_color, 'Nom Nom !')
+        imgui.Indent(100)
+        imgui.TextColored(settings.text_color, 'Nom Nom !')
         imgui.Indent(-100)
         local selection = {settings.menu_holder[1] + 1}
         if imgui.Combo('Select Food', selection, settings.list) then
