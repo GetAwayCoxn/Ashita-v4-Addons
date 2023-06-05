@@ -31,7 +31,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     
     if targetIndex == lastMobIndex then return end
 
-    targetEntity = GetEntity(targetIndex)
+    local targetEntity = GetEntity(targetIndex)
     if targetEntity then
         lastMobIndex = targetEntity.TargetIndex;
         if targetEntity.Type == 2 then

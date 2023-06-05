@@ -52,6 +52,6 @@ ashita.events.register('command', 'command_cb', function (e)
         interface.settings.reset();
         interface.data = interface.settings.load(interface.progress_defaults);
     elseif (args[2] == 'test') then
-        manager.Test();
+        interface.manager.Test();
     end
 end);
