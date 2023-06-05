@@ -9,6 +9,7 @@ chat = require('chat');
 local interface = require('interface');
 imgui = require('imgui');
 check = true;
+lastPacketOut = os.time()
 
 ashita.events.register('load', 'load_cb', interface.Load);
 
@@ -17,9 +18,9 @@ ashita.events.register('unload', 'unload_cb', interface.Unload);
 ashita.events.register('d3d_present', 'present_cb', interface.Render);
 
 ashita.events.register('text_in', 'text_in_cb', function(e)
-    if e.message:contains('Paparoon') and e.message:contains('more shinies') then
+    if not e.injected and e.message:contains('Paparoon') then
         interface.manager.HandlePaparoon(e)
-    elseif e.message:contains('Oboro') then
+    elseif not e.injected and e.message:contains('Oboro') then
         interface.manager.HandleOboro(e)
     end
 end);
@@ -46,6 +47,15 @@ ashita.events.register('command', 'command_cb', function (e)
     if (#args == 1 or (#args >= 2 and args[2]:any('interface'))) then
         if not interface.is_open[1] then 
             check = true;--bool that gets set true on first load and once again whenever the display is first rendered after being disabled
+            if os.time() - lastPacketOut > 10 then
+                AshitaCore:GetPacketManager():AddOutgoingPacket(0x10F, { 0x00, 0x00, 0x00, 0x00 });--update currency1
+                local function Currency2()
+                    AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2
+                    lastPacketOut = os.time() -- Just in case, reset this again
+                end
+                lastPacketOut = os.time()
+                Currency2:once(3)
+            end
         end
         interface.is_open[1] = not interface.is_open[1];
     elseif (args[2] == 'reset') then

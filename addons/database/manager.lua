@@ -8,6 +8,7 @@ local manager = T{
     plasm = 0;
     pointsmap = {50, 80, 120, 170, 220, 280, 340, 410, 480, 560, 650, 750, 860, 980};
     expmap = {2500,5550,8721,11919,15122,18327,21532,24737,27942,31147,41205,48130,53677,58618,63292,67848,72353,76835,81307,85775,109112,127014,141329,153277,163663,173018,181692,189917,197845,205578,258409,307400,353012,395691,435673,473392,509085,542995,575336,606296,769426,951369,1154006,1379407,1629848,1907833,2216116,2557728,2936001,3354601,3817561};
+    masterexptotal = 0.0;
     jobs = {};
 };
 
@@ -16,14 +17,14 @@ function manager.UpdateJobs()
     local jobleveltotal = 0.0;
     local JPspenttotal = 0.0;
     local masterexpspent = 0.0;
-    local masterexptotal = 0.0;
+    manager.masterexptotal = 0.0;
     local joblevelmax = 99.0 * #interface.defaults.jobsabrv;
     local JPmax = 2100.0 * #interface.defaults.jobsabrv;
     
     for n = 1, #interface.defaults.jobsabrv do
         local mLV = player:GetJobMasterLevel(n);
         for x = 1, #manager.expmap do
-            masterexptotal = masterexptotal + manager.expmap[x];
+            manager.masterexptotal = manager.masterexptotal + manager.expmap[x];
         end
         manager.jobs[n] = {player:GetJobLevel(n),player:GetJobPointsSpent(n),mLV,player:GetJobPoints(n)};
         jobleveltotal = jobleveltotal + player:GetJobLevel(n);
@@ -36,7 +37,7 @@ function manager.UpdateJobs()
             end
         end
     end
-    interface.data.progress.jobs = {(jobleveltotal / joblevelmax),(JPspenttotal / JPmax),(masterexpspent / masterexptotal)};
+    interface.data.progress.jobs = {(jobleveltotal / joblevelmax),(JPspenttotal / JPmax),(masterexpspent / manager.masterexptotal)};
 end
 
 function manager.DisplayJobs()
@@ -69,10 +70,11 @@ function manager.DisplayJobs()
     imgui.EndTable();
     imgui.NewLine();imgui.Separator();imgui.NewLine();
     imgui.TextColored(interface.colors.green, 'Total JOB Level Completion:');
-    imgui.ProgressBar(interface.data.progress.jobs[1], 10);imgui.NewLine();
+    imgui.ProgressBar(interface.data.progress.jobs[1], 10);
     imgui.TextColored(interface.colors.green, 'Total JOB Points Completion:');
-    imgui.ProgressBar(interface.data.progress.jobs[2], 10);imgui.NewLine();
-    imgui.TextColored(interface.colors.green, 'Total JOB Master Level Completion:');
+    imgui.ProgressBar(interface.data.progress.jobs[2], 10);
+    imgui.TextColored(interface.colors.green, 'Total JOB Master Level Completion:' );
+    imgui.SameLine();imgui.TextColored(interface.colors.header, manager.comma_value(manager.masterexptotal / 100) .. ' points per %%');
     imgui.ProgressBar(interface.data.progress.jobs[3], 100);imgui.NewLine();
     if (imgui.Button('Update Jobs')) then
         print(chat.header(addon.name) .. chat.message('Updated Jobs'));
@@ -87,32 +89,45 @@ function manager.UpdateRelics()
     local itemcountsIDsThousands = {1457,1454,1451};
 
     for weapon = 1, #interface.defaults.weapons.relics do
-        -- for stage = #interface.defaults.weapons.relics[weapon],1,-1 do
-            local stage = modifind.searchIdTable(interface.defaults.weapons.relics[weapon]:reverse());
-            if (stage) then
-            -- if (modifind.searchId(interface.defaults.weapons.relics[weapon][stage])) then
-                if (stage == #interface.defaults.weapons.relics[weapon]) then
+        local stage = modifind.searchIdTable(interface.defaults.weapons.relics[weapon]:reverse());
+        -- Check special ammo weps
+        if weapon == 13 then 
+            if modifind.searchId(22129) then
+                stage = 9
+            end
+        elseif weapon == 14 then
+            if modifind.searchId(22140) then
+                stage = 9
+            end
+        end
+        if (stage) then
+            if (stage == #interface.defaults.weapons.relics[weapon]) then
+                -- More special ammo wep stuffs
+                if weapon == 13 then
+                    interface.data.progress.weapons.relics[weapon][3] = modifind.checkItemRankInfo(22129);
+                    interface.data.progress.weapons.relics[weapon][2] = stage;
+                elseif weapon == 14 then
+                    interface.data.progress.weapons.relics[weapon][3] = modifind.checkItemRankInfo(22140);
+                    interface.data.progress.weapons.relics[weapon][2] = stage;
+                else
                     interface.data.progress.weapons.relics[weapon][3] = modifind.checkItemRankInfo(interface.defaults.weapons.relics[weapon][stage]);
                     interface.data.progress.weapons.relics[weapon][2] = stage;
-                    -- break;
-                else
-                    interface.data.progress.weapons.relics[weapon][2] = stage;
-                    for x = stage + 1, #interface.defaults.weapons.relics[weapon] do
-                        for c = 1, #itemcounts do
-                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.relicsreq[x][weapon][c];
-                        end
-                    end
-                    -- break;
                 end
             else
-            -- elseif (stage == 1) and (modifind.searchId(interface.defaults.weapons.relics[weapon][stage]) == false) then
-                for x = 1, #interface.defaults.weapons.relics[weapon] do
+                interface.data.progress.weapons.relics[weapon][2] = stage;
+                for x = stage + 1, #interface.defaults.weapons.relics[weapon] do
                     for c = 1, #itemcounts do
                         itemcounts[c] = itemcounts[c] + interface.defaults.weapons.relicsreq[x][weapon][c];
                     end
                 end
             end
-        -- end
+        else
+            for x = 1, #interface.defaults.weapons.relics[weapon] do
+                for c = 1, #itemcounts do
+                    itemcounts[c] = itemcounts[c] + interface.defaults.weapons.relicsreq[x][weapon][c];
+                end
+            end
+        end
     end
 
     for c = 1, #itemcounts do
@@ -260,32 +275,45 @@ function manager.UpdateMythics()
     local itemcountsIDs = {2488,3503,4060};
 
     for weapon = 1, #interface.defaults.weapons.mythics do
-        -- for stage = #interface.defaults.weapons.mythics[weapon],1,-1 do
-            local stage = modifind.searchIdTable(interface.defaults.weapons.mythics[weapon]:reverse());
-            if (stage) then
-            -- if (modifind.searchId(interface.defaults.weapons.mythics[weapon][stage])) then
-                if (stage == #interface.defaults.weapons.mythics[weapon]) then
+        local stage = modifind.searchIdTable(interface.defaults.weapons.mythics[weapon]:reverse());
+        -- Check special ammo weps
+        if weapon == 11 then 
+            if modifind.searchId(22139) then
+                stage = 8
+            end
+        elseif weapon == 17 then
+            if modifind.searchId(22141) then
+                stage = 8
+            end
+        end
+        if (stage) then
+            if (stage >= #interface.defaults.weapons.mythics[weapon]) then
+                -- More special ammo wep stuffs
+                if weapon == 11 then
+                    interface.data.progress.weapons.mythics[weapon][3] = modifind.checkItemRankInfo(22139);
+                    interface.data.progress.weapons.mythics[weapon][2] = stage;
+                elseif weapon == 17 then
+                    interface.data.progress.weapons.mythics[weapon][3] = modifind.checkItemRankInfo(22141);
+                    interface.data.progress.weapons.mythics[weapon][2] = stage;
+                else
                     interface.data.progress.weapons.mythics[weapon][3] = modifind.checkItemRankInfo(interface.defaults.weapons.mythics[weapon][stage]);
                     interface.data.progress.weapons.mythics[weapon][2] = stage;
-                    -- break;
-                else
-                    interface.data.progress.weapons.mythics[weapon][2] = stage;
-                    for x = stage + 1, #interface.defaults.weapons.mythics[weapon] do
-                        for c = 1, #itemcounts do
-                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.mythicsreq[x][weapon][c];
-                        end
-                    end
-                    -- break;
                 end
             else
-            -- elseif (stage == 1) and (modifind.searchId(interface.defaults.weapons.mythics[weapon][stage]) == false) then
-                for x = 1, #interface.defaults.weapons.mythics[weapon] do
+                interface.data.progress.weapons.mythics[weapon][2] = stage;
+                for x = stage + 1, #interface.defaults.weapons.mythics[weapon] do
                     for c = 1, #itemcounts do
                         itemcounts[c] = itemcounts[c] + interface.defaults.weapons.mythicsreq[x][weapon][c];
                     end
                 end
             end
-        -- end
+        else
+            for x = 1, #interface.defaults.weapons.mythics[weapon] do
+                for c = 1, #itemcounts do
+                    itemcounts[c] = itemcounts[c] + interface.defaults.weapons.mythicsreq[x][weapon][c];
+                end
+            end
+        end
     end
 
     for c = 1, #itemcounts do
@@ -308,11 +336,6 @@ function manager.UpdateMythics()
 end
 
 function manager.DisplayMythics()
-    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
-        AshitaCore:GetPacketManager():AddOutgoingPacket(0x10F, { 0x00, 0x00, 0x00, 0x00 });--update currency1
-        -- print('Currency Test')
-        check = false;
-    end
     imgui.BeginTable('mythics table', 10, ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
@@ -357,7 +380,7 @@ function manager.DisplayMythics()
         end
     end
     imgui.EndTable();
-    imgui.NewLine();imgui.Separator();imgui.NewLine();
+    imgui.Separator();
     imgui.BeginTable('mythic needed table', 5, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'Mythic Need:');
@@ -376,7 +399,7 @@ function manager.DisplayMythics()
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.progress.weapons.mythicsneeds[3])));
         imgui.TableNextColumn();imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.progress.weapons.mythicsneeds[4])));
     imgui.EndTable();
-    imgui.NewLine();
+    imgui.Separator();
     imgui.TextColored(interface.colors.header, 'Current Weapon Remaining Items:');
     imgui.TextColored(interface.colors.header, 'Tokens: ');imgui.SameLine();imgui.Text(interface.manager.comma_value(150000 - interface.data.current['Tokens'][1]));imgui.SameLine();
     imgui.Text('(Est. Runs:');imgui.SameLine();
@@ -393,7 +416,7 @@ function manager.DisplayMythics()
         imgui.Text('0)');imgui.SameLine();
     end
     imgui.NewLine();
-    imgui.InputInt(--[[interface.data.current['Mythic'][1] .. ]]'Alexandrite', interface.data.current['Alexandrite']);imgui.SameLine();
+    imgui.InputInt(--[[interface.data.current['Mythic'][1] .. ]]'Alexandrite ', interface.data.current['Alexandrite']);imgui.SameLine();
     if (interface.data.current['Alexandrite'][1] < 0) then
         interface.data.current['Alexandrite'][1] =  0;
     elseif (interface.data.current['Alexandrite'][1] > 30000) then
@@ -401,7 +424,7 @@ function manager.DisplayMythics()
     end
     imgui.Text('Est. $: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.current['Alexandrite'][1])));
-    imgui.InputInt(--[[interface.data.current['Mythic'][2] ..]] 'Mythic Beitetsu', interface.data.current['Beitetsu']);imgui.SameLine();
+    imgui.InputInt(--[[interface.data.current['Mythic'][2] ..]] 'Mythic Beitetsu ', interface.data.current['Beitetsu']);imgui.SameLine();
     if (interface.data.current['Beitetsu'][1] < 0) then
         interface.data.current['Beitetsu'][1] =  0;
     elseif (interface.data.current['Beitetsu'][1] > 10000) then
@@ -410,7 +433,7 @@ function manager.DisplayMythics()
     imgui.Text('Est. $: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][1])));
     interface.data.current['Temp Sads'][1] = interface.data.current['Sad. Crystals'][2];--[2] for mythics
-    imgui.InputInt('Sad. Crystals', interface.data.current['Temp Sads']);imgui.SameLine();
+    imgui.InputInt('Sad. Crystals ', interface.data.current['Temp Sads']);imgui.SameLine();
     if (interface.data.current['Temp Sads'][1] < 0) then
         interface.data.current['Sad. Crystals'][2] =  0;
     elseif (interface.data.current['Temp Sads'][1] > 596) then
@@ -420,7 +443,6 @@ function manager.DisplayMythics()
     end
     imgui.Text('Est. $: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][2])));
-    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'Total Gil Est: ');imgui.SameLine();
     imgui.Text(tostring(interface.manager.comma_value(interface.data.prices['Alexandrite'][1] * interface.data.current['Alexandrite'][1] + interface.data.prices['Beitetsu'][1] * interface.data.current['Beitetsu'][1] + interface.data.prices['Sad. Crystals'][1] * interface.data.current['Sad. Crystals'][1])));
     if (imgui.Button('Update Mythics')) then
@@ -434,50 +456,61 @@ function manager.UpdateEmpyreans()
     local itemcountsIDs = {2928,2927,2929,2930,2931,2932,3293,2963,2962,2964,2965,2966,2967,3294,3288,3287,3289,3290,3291,3292,3509,3498,3499,4061};
 
     for weapon = 1, #interface.defaults.weapons.empyreans do
-        -- for i = #interface.defaults.weapons.empyreans[weapon],1,-1 do
-            local stage = modifind.searchIdTable(interface.defaults.weapons.empyreans[weapon]:reverse());
-            if (stage) then
-            -- if (modifind.searchId(interface.defaults.weapons.empyreans[weapon][i])) then
-                if (stage == #interface.defaults.weapons.empyreans[weapon]) then
+        local stage = modifind.searchIdTable(interface.defaults.weapons.empyreans[weapon]:reverse());
+        -- Check special ammo weps
+        if weapon == 13 then 
+            if modifind.searchId(22130) then
+                stage = 7
+            end
+        elseif weapon == 14 then
+            if modifind.searchId(22142) then
+                stage = 7
+            end
+        end
+        if (stage) then
+            if (stage == #interface.defaults.weapons.empyreans[weapon]) then
+                -- More special ammo wep stuffs
+                if weapon == 13 then
+                    interface.data.progress.weapons.empyreans[weapon][3] = modifind.checkItemRankInfo(22130);
+                    interface.data.progress.weapons.empyreans[weapon][2] = stage;
+                elseif weapon == 14 then
+                    interface.data.progress.weapons.empyreans[weapon][3] = modifind.checkItemRankInfo(22142);
+                    interface.data.progress.weapons.empyreans[weapon][2] = stage;
+                else
                     interface.data.progress.weapons.empyreans[weapon][3] = modifind.checkItemRankInfo(interface.defaults.weapons.empyreans[weapon][stage]);
                     interface.data.progress.weapons.empyreans[weapon][2] = stage;
-                    -- break;
-                elseif (weapon == 15 or weapon == 16) and (stage == 2) then
-                -- elseif (w == 15 or w == 16) and (i == 2) and (modifind.searchId(interface.defaults.weapons.empyreans[weapon][i])) then
-                    if (modifind.checkItemRankInfo(interface.defaults.weapons.empyreans[weapon][stage]) == true) then --leave the == true here explicitly for empy shield/harp
-                        interface.data.progress.weapons.empyreans[weapon][2] = stage;
-                        for x = stage, #interface.defaults.weapons.empyreans[weapon] do
-                            for c = 1, #itemcounts do
-                                itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
-                            end
-                        end
-                    else
-                        interface.data.progress.weapons.empyreans[weapon][2] = stage;
-                        for x = 1, #interface.defaults.weapons.empyreans[weapon] do
-                            for c = 1, #itemcounts do
-                                itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
-                            end
-                        end
-                    end
-                    -- break;
-                else
+                end
+            elseif (weapon == 15 or weapon == 16) and (stage == 2) then
+                if (modifind.checkItemRankInfo(interface.defaults.weapons.empyreans[weapon][stage]) == true) then --leave the == true here explicitly for empy shield/harp
                     interface.data.progress.weapons.empyreans[weapon][2] = stage;
-                    for x = stage + 1, #interface.defaults.weapons.empyreans[weapon] do
+                    for x = stage, #interface.defaults.weapons.empyreans[weapon] do
                         for c = 1, #itemcounts do
                             itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
                         end
                     end
-                    -- break;
+                else
+                    interface.data.progress.weapons.empyreans[weapon][2] = stage;
+                    for x = 1, #interface.defaults.weapons.empyreans[weapon] do
+                        for c = 1, #itemcounts do
+                            itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
+                        end
+                    end
                 end
             else
-            -- elseif (i == 1) and (modifind.searchId(interface.defaults.weapons.empyreans[weapon][i]) == false) then
-                for x = 1, #interface.defaults.weapons.empyreans[weapon] do
+                interface.data.progress.weapons.empyreans[weapon][2] = stage;
+                for x = stage + 1, #interface.defaults.weapons.empyreans[weapon] do
                     for c = 1, #itemcounts do
                         itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
                     end
                 end
             end
-        -- end
+        else
+            for x = 1, #interface.defaults.weapons.empyreans[weapon] do
+                for c = 1, #itemcounts do
+                    itemcounts[c] = itemcounts[c] + interface.defaults.weapons.empyreansreq[x][weapon][c];
+                end
+            end
+        end
     end
 
     for c = 1, #itemcounts do
@@ -690,11 +723,6 @@ function manager.UpdateErgons()
 end
 
 function manager.DisplayErgons()
-    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
-        AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2
-        -- print('Currency Test')
-        check = false;
-    end
     imgui.BeginTable('ergon table', #interface.defaults.weapons.ergons[1], ImGuiTableFlags_Borders);
     imgui.TableNextRow(ImGuiTableRowFlags_Headers);
     imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
@@ -842,10 +870,6 @@ function manager.UpdatePrimes()
 end
 
 function manager.DisplayPrimes()
-    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
-        AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2galli
-        check = false;
-    end
     imgui.BeginTable('primes table', 3, ImGuiTableFlags_Borders);
         imgui.TableNextRow(ImGuiTableRowFlags_Headers);
         imgui.TableNextColumn();imgui.TextColored(interface.colors.header, 'WEAPONS');
@@ -961,7 +985,7 @@ function manager.DisplayAmbuWeps()
 
         for b = 1, (#items -1) do
             imgui.TableNextColumn();
-            imgui.Text(tostring(items[b]));
+            imgui.Text(tostring(items[b] - modifind.countItemId(9780)));
         end
         local pulsecount = 0;
         for i = 1, #interface.defaults.weapons.pulse do
@@ -1024,42 +1048,45 @@ end
 
 function manager.CountAFGearInv(items)
     if items == nil then return end
-    local chap1 = 0;local chap2 = 0;local slot1 = 0;local slot2 = 0;local slot3 = 0;
-    
+    local slot1 = 0;local slot2 = 0;local slot3 = 0;
+    local chapterMap109 = {
+        "Rem's Tale Ch.1",
+        "Rem's Tale Ch.2",
+        "Rem's Tale Ch.3",
+        "Rem's Tale Ch.4",
+        "Rem's Tale Ch.5",
+    }
+    local chapterMap119 = {
+        "Rem's Tale Ch.6",
+        "Rem's Tale Ch.7",
+        "Rem's Tale Ch.8",
+        "Rem's Tale Ch.9",
+        "Rem's Tale Ch.10",
+    }
     for y=1, #items[1] do
         if y == 1 then -- set IDs for some of the variables
-            chap1 = 4064;
-            chap2 = 4069;
             slot1 = 844;
             slot2 = 8720;
             slot3 = 8983;
         elseif y == 2 then
-            chap1 = 4065;
-            chap2 = 4070;
             slot1 = 837;
             slot2 = 8722;
             slot3 = 8986;
         elseif y == 3 then
-            chap1 = 4066;
-            chap2 = 4071;
             slot1 = 1110;
             slot2 = 8724;
             slot3 = 8979;
         elseif y == 4 then
-            chap1 = 4067;
-            chap2 = 4072;
             slot1 = 836;
             slot2 = 8726;
             slot3 = 8988;
         elseif y == 5 then
-            chap1 = 4068;
-            chap2 = 4073;
             slot1 = 1311;
             slot2 = 8728;
             slot3 = 8981;
         end
-        items[1][y][1] = 0 - modifind.countItemId(chap1); --countchapt 1-5
-        items[2][y][1] = 0 - modifind.countItemId(chap2); --countchapt 6-10
+        items[1][y][1] = 0 - interface.data.stored[chapterMap109[y]] - interface.data.inventory[chapterMap109[y]]; --countchapt 1-5
+        items[2][y][1] = 0 - interface.data.stored[chapterMap119[y]] - interface.data.inventory[chapterMap119[y]]; --countchapt 6-10
         items[1][y][2] = 0 - modifind.countItemId(slot1); --count 109slot
         items[2][y][2] = 0 - modifind.countItemId(slot2); --count 1191slot
         items[3][y][1] = 0 - modifind.countItemId(slot3); --count 1192slot
@@ -1073,12 +1100,12 @@ function manager.CountAFGearInv(items)
     end
 
     local checks3 = {0,9253,9245,9251,9257,9255,9249,9247};-- lv119+1 extra items in order of default array: blank,S.Faulpie Leather,Cypress Log,Khoma Thread,Azure Leaf,Cyan Coral,Ruthenium Ore,Niobium Ore,
-    for i = 3, #items[3][1] do
+    for i = 2, #items[3][1] do
         items[3][1][i] = 0 - modifind.countItemId(checks3[i]);
     end
 
     local checks4 = {9303,9305,9304,9307,9306,9253,9245,9246,9251,9252,9258,9256,9250,9248,9254};-- lv119+1 extra items in order of default array: kin,kei,gin,fu,kyou,S.Faulpie Leather,Cypress Log,cypress Lbr,Khoma Thread,khoma cloth,Azure Cermet,Cyan Orb,Ruthenium Ingot,Niobium Ingot,Faulpie Leather
-    for i = 3, #items[4][1] do
+    for i = 1, #items[4][1] do
         items[4][1][i] = 0 - modifind.countItemId(checks4[i]);
     end
 
@@ -1219,9 +1246,32 @@ function manager.CountAFGear()
             end
         end
     end
-    
+    local cardInvMap = {
+        interface.data.inventory['P. WAR Card'],
+        interface.data.inventory['P. MNK Card'],
+        interface.data.inventory['P. WHM Card'],
+        interface.data.inventory['P. BLM Card'],
+        interface.data.inventory['P. RDM Card'],
+        interface.data.inventory['P. THF Card'],
+        interface.data.inventory['P. PLD Card'],
+        interface.data.inventory['P. DRK Card'],
+        interface.data.inventory['P. BST Card'],
+        interface.data.inventory['P. BRD Card'],
+        interface.data.inventory['P. RNG Card'],
+        interface.data.inventory['P. SAM Card'],
+        interface.data.inventory['P. NIN Card'],
+        interface.data.inventory['P. DRG Card'],
+        interface.data.inventory['P. SMN Card'],
+        interface.data.inventory['P. BLU Card'],
+        interface.data.inventory['P. COR Card'],
+        interface.data.inventory['P. PUP Card'],
+        interface.data.inventory['P. DNC Card'],
+        interface.data.inventory['P. SCH Card'],
+        interface.data.inventory['P. GEO Card'],
+        interface.data.inventory['P. RUN Card'],
+    }
     for l = 1, #interface.data.progress.gear.jobcards do
-        interface.data.progress.gear.jobcards[l] = cards[l]
+        interface.data.progress.gear.jobcards[l] = cards[l] - cardInvMap[l]
     end
 end
 
@@ -1237,10 +1287,7 @@ function manager.DisplayAFGear()
         end
     end
     imgui.EndTable();
-    imgui.NewLine();
-    
     imgui.TextColored(interface.colors.header, 'Progress: ');imgui.SameLine();imgui.ProgressBar(interface.data.progress.gear.afProgress[1],10);
-    imgui.NewLine();
     if (imgui.Button('Update AF Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated AF Gear'));
         interface.manager.UpdateAFGear();
@@ -1491,18 +1538,13 @@ function manager.DisplayAFGearNeed()
     imgui.EndTable();
 
     imgui.Text('Est. Needed Gil for Guild Items:  ');imgui.SameLine();imgui.TextColored(interface.colors.header, manager.comma_value(manager.guilditemsgil));
+    if (imgui.Button('Update AF Gear')) then
+        print(chat.header(addon.name) .. chat.message('Updated AF Gear'));
+        interface.manager.UpdateAFGear();
+    end
 end
 
 function manager.UpdateRelicGear()
-    --one time count of relic unlock KI's, also set global check to false for safety of not spamming currency packets accidently
-    -- AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2 (removed here for safety due to potential button spam)
-    for k,v in ipairs(interface.defaults.gear.relicUnlockKeyItems) do
-        if (modifind.searchKeyItemName(v)) then
-            interface.data.progress.gear.relicUnlocks[k] = true;
-        end
-    end
-    check = false;
-
     local countgear = 0;
     local totalgear = #interface.defaults.gear.relic * #interface.defaults.gear.relic[1] * #interface.defaults.gear.relic[1][1];
     for job = 1, #interface.defaults.gear.relic do
@@ -1524,26 +1566,52 @@ end
 
 function manager.CountRelicGearInv(items)
     if items == nil then return end
+    
+    items[1][1] = 0 - interface.data.inventory['Frgtn. Thought'];
+    items[1][2] = 0 - interface.data.inventory['Forgotten Hope'];
+    items[1][3] = 0 - interface.data.inventory['Forgotten Touch'];
+    items[1][4] = 0 - interface.data.inventory['Frgtn. Journey'];
+    items[1][5] = 0 - interface.data.inventory['Forgotten Step'];
+    
+    items[2][1][2] = 0 - interface.data.inventory['Phoenix Feather'];
+    items[2][2][2] = 0 - interface.data.inventory['Malboro Fiber'];
+    items[2][3][2] = 0 - interface.data.inventory['Beetle Blood'];
+    items[2][4][2] = 0 - interface.data.inventory['Damascene Cloth'];
+    items[2][5][2] = 0 - interface.data.inventory['Oxblood'];
 
-    local forgottenIDs = {3493,3494,3495,3496,3497};
-    for i = 1, #forgottenIDs do
-        items[1][i] = items[1][i] - modifind.countItemId(forgottenIDs[i]);
-    end
+    items[2][1][3] = 0 - interface.data.inventory['Wootz Ore'];
+    items[2][1][4] = 0 - interface.data.inventory['Griffon Hide'];
+    items[2][1][5] = 0 - interface.data.inventory['Sparkling Stone'];
+    items[2][1][6] = 0 - interface.data.inventory['Mammoth Tusk'];
+    items[2][1][7] = 0 - interface.data.inventory['Relic Iron'];
+    items[2][1][8] = 0 - interface.data.inventory['Lancewood Log'];
 
-    local checks1 = {0,0,1469,1516,1470,1458,1466,1464};--{blank,blank,wootze ore,griffon hide,sparkling stone,mammoth tusk,relic iron,lancewood log,}
-    for i = 3, #checks1 do
-        items[2][1][i] = items[2][1][i] - modifind.countItemId(checks1[i]);
-    end
+    items[3][1][2] = 0 - interface.data.inventory['Gabbrath Horn'];
+    items[3][2][2] = 0 - interface.data.inventory['Yggdreant Bole'];
+    items[3][3][2] = 0 - interface.data.inventory['Bztavian Stinger'];
+    items[3][4][2] = 0 - interface.data.inventory['Waktza Rostrum'];
+    items[3][5][2] = 0 - interface.data.inventory['Rockfin Tooth'];
+    
+    items[3][1][3] = 0 - interface.data.inventory['Voidwrought Plate'];
+    items[3][1][4] = 0 - interface.data.inventory['Kaggen\'s Cuticle'];
+    items[3][1][5] = 0 - interface.data.inventory['Akvan\'s Pennon'];
+    items[3][1][6] = 0 - interface.data.inventory['Pil\'s Tuille'];
+    items[3][1][7] = 0 - interface.data.inventory['Hahava\'s Mail'];
+    items[3][1][8] = 0 - interface.data.inventory['Celaeno\'s Cloth'];
 
-    local checks2 = {0,0,3447,3492,3491,3490,3445,3449};--{blank,blank,voidwrought plate,kaggen's cuticle,akvan's pennon,pil's tuille,hahava's mail,celaeno's cloth'}
-    for i = 3, #checks2 do
-        items[3][1][i] = items[3][1][i] - modifind.countItemId(checks2[i]);
-    end
-
-    local checks3 = {0,9253,9245,9251,9257,9255,9249,9247};--{blank,S.Faulpie Leather,Cypress Log,Khoma Thread,Azure Leaf,Cyan Coral,Ruthenium Ore,Niobium Ore,}
-    for i = 3, #checks3 do
-        items[4][1][i] = items[4][1][i] - modifind.countItemId(checks3[i]);
-    end
+    items[4][1][1] = 0 - interface.data.inventory['Gabbrath Horn'];
+    items[4][2][1] = 0 - interface.data.inventory['Yggdreant Bole'];
+    items[4][3][1] = 0 - interface.data.inventory['Bztavian Stinger'];
+    items[4][4][1] = 0 - interface.data.inventory['Waktza Rostrum'];
+    items[4][5][1] = 0 - interface.data.inventory['Rockfin Tooth'];
+    
+    items[4][1][2] = 0 - interface.data.inventory['S. Faulpie Leather'];
+    items[4][1][3] = 0 - interface.data.inventory['Cypress Log'];
+    items[4][1][4] = 0 - interface.data.inventory['Khoma Thread'];
+    items[4][1][5] = 0 - interface.data.inventory['Azure Leaf'];
+    items[4][1][6] = 0 - interface.data.inventory['Cyan Coral'];
+    items[4][1][7] = 0 - interface.data.inventory['Ruthenium Ore'];
+    items[4][1][8] = 0 - interface.data.inventory['Niobium Ore'];
 
     for j = 1, #items[5] do
         for s = 1, #items[5][j] do
@@ -1571,93 +1639,104 @@ function manager.CountRelicGear()
             {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}}
         },
     };
+
     interface.data.progress.gear.relicneed = manager.CountRelicGearInv(interface.data.progress.gear.relicneed);
 
-    for x = 1, #interface.data.progress.gear.relic do
-        for y = 1, #interface.data.progress.gear.relic[x] do
-            if interface.data.progress.gear.relic[x][y][1] <= 2 then
-                if interface.data.progress.gear.relic[x][y][1] <= 1 then
-                    interface.data.progress.gear.relicneed[1][y] = interface.data.progress.gear.relicneed[1][y] + 50;
+    for job = 1, #interface.data.progress.gear.relic do
+        for slot = 1, #interface.data.progress.gear.relic[job] do
+            if interface.data.progress.gear.relic[job][slot][1] <= 2 then
+                if interface.data.progress.gear.relic[job][slot][1] <= 1 then
+                    interface.data.progress.gear.relicneed[1][slot] = interface.data.progress.gear.relicneed[1][slot] + 50;
                 else
-                    interface.data.progress.gear.relicneed[1][y] = interface.data.progress.gear.relicneed[1][y] + 30;
+                    interface.data.progress.gear.relicneed[1][slot] = interface.data.progress.gear.relicneed[1][slot] + 30;
                 end
             end
-            if interface.data.progress.gear.relic[x][y][1] <= 3 then
-                if interface.data.progress.gear.relic[x][y][1] <= 2 then
-                    interface.data.progress.gear.relicneed[2][y][1] = interface.data.progress.gear.relicneed[2][y][1] + 10;
+            if interface.data.progress.gear.relic[job][slot][1] <= 3 then
+                if interface.data.progress.gear.relic[job][slot][1] <= 2 then
+                    interface.data.progress.gear.relicneed[2][slot][1] = interface.data.progress.gear.relicneed[2][slot][1] + 10;
                 else
-                    interface.data.progress.gear.relicneed[2][y][1] = interface.data.progress.gear.relicneed[2][y][1] + 5;
+                    interface.data.progress.gear.relicneed[2][slot][1] = interface.data.progress.gear.relicneed[2][slot][1] + 5;
                 end
-                interface.data.progress.gear.relicneed[2][y][2] = interface.data.progress.gear.relicneed[2][y][2] + 1;
-                if (x == 1) or (x == 7) or (x == 8) then
-                    interface.data.progress.gear.relicneed[2][y][3] = interface.data.progress.gear.relicneed[2][y][3] + 1;
-                elseif (x == 2) or (x == 5) or (x == 6) or (x == 10) or (x == 11) or (x == 14) or (x == 16) then
-                    interface.data.progress.gear.relicneed[2][y][4] = interface.data.progress.gear.relicneed[2][y][4] + 1;
-                elseif (x == 3) or (x == 4) or (x == 17) then
-                    interface.data.progress.gear.relicneed[2][y][5] = interface.data.progress.gear.relicneed[2][y][5] + 1;
-                elseif (x == 9) or (x == 19) then
-                    interface.data.progress.gear.relicneed[2][y][6] = interface.data.progress.gear.relicneed[2][y][6] + 1;
-                elseif (x == 12) or (x == 13) then
-                    interface.data.progress.gear.relicneed[2][y][7] = interface.data.progress.gear.relicneed[2][y][7] + 1;
-                elseif (x == 15) or (x == 18) or (x == 20) then
-                    interface.data.progress.gear.relicneed[2][y][8] = interface.data.progress.gear.relicneed[2][y][8] + 1;
-                end
-            end
-            if interface.data.progress.gear.relic[x][y][1] <= 4 then
-                interface.data.progress.gear.relicneed[3][y][1] = interface.data.progress.gear.relicneed[3][y][1] + 8;
-                interface.data.progress.gear.relicneed[3][y][2] = interface.data.progress.gear.relicneed[3][y][2] + 1;
-                if (x == 1) or (x == 13) or (x == 14) then
-                    interface.data.progress.gear.relicneed[3][y][3] = interface.data.progress.gear.relicneed[3][y][3] + 1;
-                elseif (x == 2) or (x == 6) or (x == 10) or (x == 17) then
-                    interface.data.progress.gear.relicneed[3][y][4] = interface.data.progress.gear.relicneed[3][y][4] + 1;
-                elseif (x == 3) or (x == 4) or (x == 20) or (x == 21) then
-                    interface.data.progress.gear.relicneed[3][y][5] = interface.data.progress.gear.relicneed[3][y][5] + 1;
-                elseif (x == 5) or (x == 7) or (x == 8) or (x == 12) or (x == 16) then
-                    interface.data.progress.gear.relicneed[3][y][6] = interface.data.progress.gear.relicneed[3][y][6] + 1;
-                elseif (x == 9) or (x == 15) or (x == 18) then
-                    interface.data.progress.gear.relicneed[3][y][7] = interface.data.progress.gear.relicneed[3][y][7] + 1;
-                elseif (x == 11) or (x == 19) or (x == 22) then
-                    interface.data.progress.gear.relicneed[3][y][8] = interface.data.progress.gear.relicneed[3][y][8] + 1;
+                interface.data.progress.gear.relicneed[2][slot][2] = interface.data.progress.gear.relicneed[2][slot][2] + 1;
+                if (job == 1) or (job == 7) or (job == 8) then
+                    interface.data.progress.gear.relicneed[2][slot][3] = interface.data.progress.gear.relicneed[2][slot][3] + 1;
+                elseif (job == 2) or (job == 5) or (job == 6) or (job == 10) or (job == 11) or (job == 14) or (job == 16) then
+                    interface.data.progress.gear.relicneed[2][slot][4] = interface.data.progress.gear.relicneed[2][slot][4] + 1;
+                elseif (job == 3) or (job == 4) or (job == 17) then
+                    interface.data.progress.gear.relicneed[2][slot][5] = interface.data.progress.gear.relicneed[2][slot][5] + 1;
+                elseif (job == 9) or (job == 19) then
+                    interface.data.progress.gear.relicneed[2][slot][6] = interface.data.progress.gear.relicneed[2][slot][6] + 1;
+                elseif (job == 12) or (job == 13) then
+                    interface.data.progress.gear.relicneed[2][slot][7] = interface.data.progress.gear.relicneed[2][slot][7] + 1;
+                elseif (job == 15) or (job == 18) or (job == 20) then
+                    interface.data.progress.gear.relicneed[2][slot][8] = interface.data.progress.gear.relicneed[2][slot][8] + 1;
                 end
             end
-            if interface.data.progress.gear.relic[x][y][1] <= 5 then
-                interface.data.progress.gear.relicneed[5][x][y][1] = interface.data.progress.gear.relicneed[5][x][y][1] + 2;
-                interface.data.progress.gear.relicneed[4][y][1] = interface.data.progress.gear.relicneed[4][y][1] + 3;
-                if (x == 1) or (x == 9) or (x == 11) then
-                    interface.data.progress.gear.relicneed[4][y][2] = interface.data.progress.gear.relicneed[4][y][2] + 1;
-                elseif (x == 2) or (x == 6) or (x == 19) then
-                    interface.data.progress.gear.relicneed[4][y][3] = interface.data.progress.gear.relicneed[4][y][3] + 1;
-                elseif (x == 3) or (x == 10) or (x == 16) or (x == 21) then
-                    interface.data.progress.gear.relicneed[4][y][4] = interface.data.progress.gear.relicneed[4][y][4] + 1;
-                elseif (x == 4) or (x == 17) or (x == 18) then
-                    interface.data.progress.gear.relicneed[4][y][5] = interface.data.progress.gear.relicneed[4][y][5] + 1;
-                elseif (x == 5) or (x == 15) or (x == 20) then
-                    interface.data.progress.gear.relicneed[4][y][6] = interface.data.progress.gear.relicneed[4][y][6] + 1;
-                elseif (x == 7) or (x == 14) then
-                    interface.data.progress.gear.relicneed[4][y][7] = interface.data.progress.gear.relicneed[4][y][7] + 1;
-                elseif (x == 8) or (x == 12) or (x == 13) or (x == 22) then
-                    interface.data.progress.gear.relicneed[4][y][8] = interface.data.progress.gear.relicneed[4][y][8] + 1;
+            if interface.data.progress.gear.relic[job][slot][1] <= 4 then
+                interface.data.progress.gear.relicneed[3][slot][1] = interface.data.progress.gear.relicneed[3][slot][1] + 8;
+                interface.data.progress.gear.relicneed[3][slot][2] = interface.data.progress.gear.relicneed[3][slot][2] + 1;
+                if (job == 1) or (job == 13) or (job == 14) then
+                    interface.data.progress.gear.relicneed[3][slot][3] = interface.data.progress.gear.relicneed[3][slot][3] + 1;
+                elseif (job == 2) or (job == 6) or (job == 10) or (job == 17) then
+                    interface.data.progress.gear.relicneed[3][slot][4] = interface.data.progress.gear.relicneed[3][slot][4] + 1;
+                elseif (job == 3) or (job == 4) or (job == 20) or (job == 21) then
+                    interface.data.progress.gear.relicneed[3][slot][5] = interface.data.progress.gear.relicneed[3][slot][5] + 1;
+                elseif (job == 5) or (job == 7) or (job == 8) or (job == 12) or (job == 16) then
+                    interface.data.progress.gear.relicneed[3][slot][6] = interface.data.progress.gear.relicneed[3][slot][6] + 1;
+                elseif (job == 9) or (job == 15) or (job == 18) then
+                    interface.data.progress.gear.relicneed[3][slot][7] = interface.data.progress.gear.relicneed[3][slot][7] + 1;
+                elseif (job == 11) or (job == 19) or (job == 22) then
+                    interface.data.progress.gear.relicneed[3][slot][8] = interface.data.progress.gear.relicneed[3][slot][8] + 1;
                 end
             end
-            if interface.data.progress.gear.relic[x][y][1] <= 6 then
-                interface.data.progress.gear.relicneed[5][x][y][1] = interface.data.progress.gear.relicneed[5][x][y][1] + 3;
-                interface.data.progress.gear.relicneed[5][x][y][2] = interface.data.progress.gear.relicneed[5][x][y][2] + 3;
-                interface.data.progress.gear.relicneed[5][x][y][3] = interface.data.progress.gear.relicneed[5][x][y][3] + 3;
+            if interface.data.progress.gear.relic[job][slot][1] <= 5 then
+                interface.data.progress.gear.relicneed[5][job][slot][1] = interface.data.progress.gear.relicneed[5][job][slot][1] + 2;
+                interface.data.progress.gear.relicneed[4][slot][1] = interface.data.progress.gear.relicneed[4][slot][1] + 3;
+                if (job == 1) or (job == 9) or (job == 11) then
+                    interface.data.progress.gear.relicneed[4][slot][2] = interface.data.progress.gear.relicneed[4][slot][2] + 1;
+                elseif (job == 2) or (job == 6) or (job == 19) then
+                    interface.data.progress.gear.relicneed[4][slot][3] = interface.data.progress.gear.relicneed[4][slot][3] + 1;
+                elseif (job == 3) or (job == 10) or (job == 16) or (job == 21) then
+                    interface.data.progress.gear.relicneed[4][slot][4] = interface.data.progress.gear.relicneed[4][slot][4] + 1;
+                elseif (job == 4) or (job == 17) or (job == 18) then
+                    interface.data.progress.gear.relicneed[4][slot][5] = interface.data.progress.gear.relicneed[4][slot][5] + 1;
+                elseif (job == 5) or (job == 15) or (job == 20) then
+                    interface.data.progress.gear.relicneed[4][slot][6] = interface.data.progress.gear.relicneed[4][slot][6] + 1;
+                elseif (job == 7) or (job == 14) then
+                    interface.data.progress.gear.relicneed[4][slot][7] = interface.data.progress.gear.relicneed[4][slot][7] + 1;
+                elseif (job == 8) or (job == 12) or (job == 13) or (job == 22) then
+                    interface.data.progress.gear.relicneed[4][slot][8] = interface.data.progress.gear.relicneed[4][slot][8] + 1;
+                end
+            end
+            if interface.data.progress.gear.relic[job][slot][1] <= 6 then
+                interface.data.progress.gear.relicneed[5][job][slot][1] = interface.data.progress.gear.relicneed[5][job][slot][1] + 3;
+                interface.data.progress.gear.relicneed[5][job][slot][2] = interface.data.progress.gear.relicneed[5][job][slot][2] + 3;
+                interface.data.progress.gear.relicneed[5][job][slot][3] = interface.data.progress.gear.relicneed[5][job][slot][3] + 3;
             end
         end
+    end
+
+    local chapterMap109 = {
+        "Rem's Tale Ch.1",
+        "Rem's Tale Ch.2",
+        "Rem's Tale Ch.3",
+        "Rem's Tale Ch.4",
+        "Rem's Tale Ch.5",
+    }
+    local chapterMap119 = {
+        "Rem's Tale Ch.6",
+        "Rem's Tale Ch.7",
+        "Rem's Tale Ch.8",
+        "Rem's Tale Ch.9",
+        "Rem's Tale Ch.10",
+    }
+    for slot=1, 5 do
+        interface.data.progress.gear.relicneed[2][slot][1] = interface.data.progress.gear.relicneed[2][slot][1] - interface.data.stored[chapterMap109[slot]] - interface.data.inventory[chapterMap109[slot]];
+        interface.data.progress.gear.relicneed[3][slot][1] = interface.data.progress.gear.relicneed[3][slot][1] - interface.data.stored[chapterMap119[slot]] - interface.data.inventory[chapterMap119[slot]];
     end
 end
 
 function manager.DisplayRelicGear()
-    if check == true then -- global that gets set true on first addon load and once again whenever the display is first rendered after being disabled
-        AshitaCore:GetPacketManager():AddOutgoingPacket(0x115, { 0x00, 0x00, 0x00, 0x00 });--update currency2
-        for k,v in ipairs(interface.defaults.gear.relicUnlockKeyItems) do
-            if (modifind.searchKeyItemName(v)) then
-                interface.data.progress.gear.relicUnlocks[k] = 1;
-            end
-        end
-        check = false;
-    end
     imgui.BeginTable('relic gear has', 5, ImGuiTableFlags_Borders);
     for a = 1, #interface.data.progress.gear.relic do
         for b = 1, #interface.data.progress.gear.relic[a] do
@@ -1669,10 +1748,9 @@ function manager.DisplayRelicGear()
         end
     end
     imgui.EndTable();
-    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'Relic Unlocks (+3):    ');
     for k,v in ipairs(interface.defaults.jobsabrv) do
-        if (interface.data.progress.gear.relicUnlocks[k]) then
+        if (interface.data.keyitems[interface.data.progress.gear.relicKiMap[k]]) then
             imgui.SameLine();imgui.TextColored(interface.colors.green,v .. ' ');
         else
             imgui.SameLine();imgui.Text(v .. ' ');
@@ -1681,6 +1759,8 @@ function manager.DisplayRelicGear()
     imgui.TextColored(interface.colors.header, 'Progress: ');imgui.SameLine();imgui.ProgressBar(interface.data.progress.gear.relicProgress[1]);
     if (imgui.Button('Update Relic Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Relic Gear'));
+        modifind.UpdateInventory();
+        modifind.UpdateKeyItems(interface.data.keyitems);
         manager.UpdateRelicGear();
     end
 end
@@ -1883,19 +1963,26 @@ function manager.DisplayRelicGearNeed()
         imgui.TextColored(interface.colors.header, 'Legs (3 ea.)');imgui.TableNextColumn();
         imgui.TextColored(interface.colors.header, 'Feet (3 ea.)');imgui.TableNextColumn();
         imgui.Text('Slot');imgui.TableNextColumn();
-        imgui.Text('Defiant Scarf');imgui.TableNextColumn();
-        imgui.Text('Hades Claw');imgui.TableNextColumn();
-        imgui.Text('Macuil Plating');imgui.TableNextColumn();
-        imgui.Text('Tartarian Soul');imgui.TableNextColumn();
-        imgui.Text('Plovid Flesh');imgui.TableNextColumn();
-        imgui.Text('Items');imgui.TableNextColumn();
+        imgui.Text("Defiant Scarf");imgui.TableNextColumn();
+        imgui.Text("Hades' Claw");imgui.TableNextColumn();
+        imgui.Text("Macuil Plating");imgui.TableNextColumn();
+        imgui.Text("Tartarian Soul");imgui.TableNextColumn();
+        imgui.Text("Plovid Flesh");imgui.TableNextColumn();
+        imgui.Text("Items");imgui.TableNextColumn();
+        local tempItemsTable = {
+            interface.data.inventory["Defiant Scarf"],
+            interface.data.inventory["Hades' Claw"],
+            interface.data.inventory["Macuil Plating"],
+            interface.data.inventory["Tartarian Soul"],
+            interface.data.inventory["Plovid Flesh"],
+        };
         for h = 1, #interface.data.progress.gear.relicneed[5][1] do
             for i = 3, #interface.data.progress.gear.relicneed[5][1][h] do
                 local count = 0;
                 for j = 1, #interface.data.progress.gear.relicneed[5] do
                     count = count + interface.data.progress.gear.relicneed[5][j][h][i];
                 end
-                imgui.Text(tostring(count));
+                imgui.Text(tostring(count - tempItemsTable[h] or 0));
                 if (h ~= #interface.data.progress.gear.relicneed[5][1]) then imgui.TableNextColumn() end
             end
         end
@@ -1909,6 +1996,8 @@ function manager.DisplayRelicGearNeed()
     imgui.NewLine();
     if (imgui.Button('Update Relic Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Relic Gear'));
+        modifind.UpdateInventory();
+        modifind.UpdateKeyItems(interface.data.keyitems);
         manager.UpdateRelicGear();
     end
     imgui.ShowHelp('119+2 and +3 items also need various shards and voids, see the next tab for display of those needs');
@@ -1972,18 +2061,17 @@ function manager.DisplayRelicShardsNeed()
 
     if (imgui.Button('Update Relic Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Relic Gear'));
+        modifind.UpdateInventory();
+        modifind.UpdateKeyItems(interface.data.keyitems);
         manager.UpdateRelicGear();
     end
 end
 
-function manager.UpdateEmpyGear()
-    --one time count of empy unlock KI's, also set global check to false for safety of not spamming currency packets accidently
-    for k,v in ipairs(interface.defaults.gear.empyUnlockKeyItems) do
-        if (modifind.searchKeyItemName(v)) then
-            interface.data.progress.gear.empyUnlocks[k] = true;
-        end
+function manager.UpdateEmpyGear(invCheck)
+    if invCheck then 
+        modifind.UpdateInventory()
+        modifind.UpdateKeyItems(interface.data.keyitems);
     end
-    check = false;
 
     local countgear = 0;
     local totalgear = #interface.defaults.gear.empyrean * #interface.defaults.gear.empyrean[1] * #interface.defaults.gear.empyrean[1][1];
@@ -2006,46 +2094,48 @@ end
 
 function manager.CountEmpyGearInv(items)
     if items == nil then return end
-    local slot1 = 0;local slot2 = 0;local slot3 = 0;local slot4 = 0;
-    local dropids = {2929,2962,3287,2927,2965,3291,2932,2930,3288,2963,3289,2966,3292,3290,2964,2928,2967};-- {briareus,itzpapalotl,orthus,glavoid,lanterns,alfard,kukulkan,cara,dragua,ulhuadshi,apademak,bukhis,azdaja,isgebind,sobek,chloris,sedna}
-    for y=1, #items[1] do
-        if y == 1 then
-            slot1 = 3210;
-            slot2 = 3212;
-            slot3 = 3211;
-            slot4 = 3213;
-        elseif y == 2 then
-            slot1 = 3214;
-            slot2 = 3216;
-            slot3 = 3215;
-            slot4 = 3217;
-        elseif y == 3 then
-            slot1 = 3218;
-            slot2 = 3220;
-            slot3 = 3219;
-            slot4 = 3221;
-        elseif y == 4 then
-            slot1 = 3222;
-            slot2 = 3224;
-            slot3 = 3223;
-            slot4 = 3225;
-        elseif y == 5 then
-            slot1 = 3226;
-            slot2 = 3228;
-            slot3 = 3227;
-            slot4 = 3229;
-        end
-        items[1][y][1] = 0 - modifind.countItemId(slot1); --count stones
-        items[1][y][2] = 0 - modifind.countItemId(slot2); --count jewels
-        items[1][y][3] = 0 - modifind.countItemId(slot3); --count coins
-        items[1][y][4] = 0 - modifind.countItemId(slot4); --count cards
-    end
-
-    --count NM items
-    for i = 3, #items[2][1] do
-        items[2][1][i] = items[2][1][i] - modifind.countItemId(dropids[i-2]);
-    end
-
+    items[1][1][1] = 0 - interface.data.inventory['Vision Stone'];
+    items[1][1][2] = 0 - interface.data.inventory['Vision Jewel'];
+    items[1][1][3] = 0 - interface.data.inventory['Vision Coin'];
+    items[1][1][4] = 0 - interface.data.inventory['Vision Card'];
+    items[1][2][1] = 0 - interface.data.inventory['Ardor Stone'];
+    items[1][2][2] = 0 - interface.data.inventory['Ardor Jewel'];
+    items[1][2][3] = 0 - interface.data.inventory['Ardor Coin'];
+    items[1][2][4] = 0 - interface.data.inventory['Ardor Card'];
+    items[1][3][1] = 0 - interface.data.inventory['Wieldance Stone'];
+    items[1][3][2] = 0 - interface.data.inventory['Wieldance Jewel'];
+    items[1][3][3] = 0 - interface.data.inventory['Wieldance Coin'];
+    items[1][3][4] = 0 - interface.data.inventory['Wieldance Card'];
+    items[1][4][1] = 0 - interface.data.inventory['Balance Stone'];
+    items[1][4][2] = 0 - interface.data.inventory['Balance Jewel'];
+    items[1][4][3] = 0 - interface.data.inventory['Balance Coin'];
+    items[1][4][4] = 0 - interface.data.inventory['Balance Card'];
+    items[1][5][1] = 0 - interface.data.inventory['Voyage Stone'];
+    items[1][5][2] = 0 - interface.data.inventory['Voyage Jewel'];
+    items[1][5][3] = 0 - interface.data.inventory['Voyage Coin'];
+    items[1][5][4] = 0 - interface.data.inventory['Voyage Card'];
+    items[2][1][2] = 0 - interface.data.inventory['Phoenix Feather'];
+    items[2][2][2] = 0 - interface.data.inventory['Malboro Fiber'];
+    items[2][3][2] = 0 - interface.data.inventory['Beetle Blood'];
+    items[2][4][2] = 0 - interface.data.inventory['Damascene Cloth'];
+    items[2][5][2] = 0 - interface.data.inventory['Oxblood'];
+    items[2][1][3] = 0 - interface.data.inventory['Helm of Briareus'];
+    items[2][1][4] = 0 - interface.data.inventory['Itzpapa. Scale'];
+    items[2][1][5] = 0 - interface.data.inventory['Orthrus\'s Claw'];
+    items[2][1][6] = 0 - interface.data.inventory['Glavoid Shell'];
+    items[2][1][7] = 0 - interface.data.inventory['Cirein-croin\'s Lantern'];
+    items[2][1][8] = 0 - interface.data.inventory['Alfard\'s Fang'];
+    items[2][1][9] = 0 - interface.data.inventory['Kukulkan\'s Fang'];
+    items[2][1][10] = 0 - interface.data.inventory['Carabosse\'s Gem'];
+    items[2][1][11] = 0 - interface.data.inventory['Dragua\'s Scale'];
+    items[2][1][12] = 0 - interface.data.inventory['Ulhuadshi\'s Fang'];
+    items[2][1][13] = 0 - interface.data.inventory['Apademak\'s Horn'];
+    items[2][1][14] = 0 - interface.data.inventory['Bukhis\'s Wing'];
+    items[2][1][15] = 0 - interface.data.inventory['Azdaja\'s Horn'];
+    items[2][1][16] = 0 - interface.data.inventory['Isgebind\'s Heart'];
+    items[2][1][17] = 0 - interface.data.inventory['Sobek\'s Skin'];
+    items[2][1][18] = 0 - interface.data.inventory['2Lf. Chloris Bud'];
+    items[2][1][19] = 0 - interface.data.inventory['Sedna\'s Tusk'];
     return items;
 end
 
@@ -2217,18 +2307,15 @@ function manager.CountEmpyGear()
             end
         end
     end
+
+    -- account for chapters in inv and stored
+    for slot=1, 5 do
+        interface.data.progress.gear.empyneed[2][slot][1] = interface.data.progress.gear.empyneed[2][slot][1] - interface.data.inventory["Rem's Tale Ch." .. slot] - interface.data.stored["Rem's Tale Ch." .. slot];
+        interface.data.progress.gear.empyneed[3][slot][1] = interface.data.progress.gear.empyneed[3][slot][1] - interface.data.inventory["Rem's Tale Ch." .. slot+5] - interface.data.stored["Rem's Tale Ch." .. slot+5];
+    end
 end
 
 function manager.DisplayEmpyGear()
-    if check == true then --bool that gets set true on first load and once again whenever the display is first rendered after being disabled
-        for k,v in ipairs(interface.defaults.gear.empyUnlockKeyItems) do
-            if (modifind.searchKeyItemName(v)) then
-                interface.data.progress.gear.empyUnlocks[k] = 1;
-            end
-        end
-        check = false;
-    end
-
     imgui.BeginTable('empy gear has', 5, ImGuiTableFlags_Borders);
     for a = 1, #interface.data.progress.gear.empyrean do
         for b = 1, #interface.data.progress.gear.empyrean[a] do
@@ -2240,10 +2327,9 @@ function manager.DisplayEmpyGear()
         end
     end
     imgui.EndTable();
-    imgui.NewLine();
     imgui.TextColored(interface.colors.header, 'Sortie Unlocks (+3):    ');
     for k,v in ipairs(interface.defaults.jobsabrv) do
-        if (interface.data.progress.gear.empyUnlocks[k]) then
+        if (interface.data.keyitems[interface.data.progress.gear.empyKiMap[k]]) then
             imgui.SameLine();imgui.TextColored(interface.colors.green,v .. ' ');
         else
             imgui.SameLine();imgui.Text(v .. ' ');
@@ -2252,8 +2338,11 @@ function manager.DisplayEmpyGear()
     imgui.TextColored(interface.colors.header, 'Progress: ');imgui.SameLine();imgui.ProgressBar(interface.data.progress.gear.empyProgress[1]);
     if (imgui.Button('Update Empy Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Empyrean Gear'));
-        interface.manager.UpdateEmpyGear();
+        modifind.UpdateKeyItems(interface.data.keyitems);
+        interface.manager.UpdateEmpyGear(true);
     end
+    imgui.SameLine();imgui.TextColored(interface.colors.header, '    Gallimaufry: ' .. manager.comma_value(interface.data.current['Gallimaufry'][1]));
+
 end
 
 function manager.DisplayEmpyBaseGearNeed()
@@ -2387,7 +2476,8 @@ function manager.DisplayEmpyBaseGearNeed()
     imgui.EndTable();
     if (imgui.Button('Update Empy Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Empyrean Gear'));
-        interface.manager.UpdateEmpyGear();
+        modifind.UpdateKeyItems(interface.data.keyitems);
+        interface.manager.UpdateEmpyGear(true);
     end
 end
 
@@ -2491,8 +2581,15 @@ function manager.DisplayEmpyReforgedGearNeed()
         imgui.Text('Tartarian Chain');imgui.TableNextColumn();
         imgui.Text('Plovid Effluvium');imgui.TableNextColumn();
         imgui.Text('Items');imgui.TableNextColumn();
+        local tempItemsTable = {
+            interface.data.inventory["Defiant Sweat"],
+            interface.data.inventory["Dark Matter"],
+            interface.data.inventory["Macuil Horn"],
+            interface.data.inventory["Tartarian Chain"],
+            interface.data.inventory["Plovid Effluvium"],
+        };
         for i = 1, #interface.data.progress.gear.empyneed[3] do
-            imgui.Text(tostring(interface.data.progress.gear.empyneed[3][i][2]));
+            imgui.Text(tostring(interface.data.progress.gear.empyneed[3][i][2] - tempItemsTable[i] or 0));
             if (i ~= #interface.data.progress.gear.empyneed[3]) then imgui.TableNextColumn() end
         end
     imgui.EndTable();
@@ -2509,7 +2606,7 @@ function manager.DisplayEmpyReforgedGearNeed()
         for i = 1, #interface.data.progress.gear.empyneed[3] do
             count = count + interface.data.progress.gear.empyneed[3][i][3];
             if (i == #interface.data.progress.gear.empyneed[3]) then
-                imgui.Text(tostring(count));imgui.TableNextColumn();
+                imgui.Text(tostring(count) .. ' (' .. tostring(interface.data.inventory['Etched Memory']) .. ' in inv)');imgui.TableNextColumn();
             end
         end
         for i = 1, #interface.data.progress.gear.empyneed[3] do
@@ -2519,7 +2616,8 @@ function manager.DisplayEmpyReforgedGearNeed()
     imgui.EndTable();
     if (imgui.Button('Update Empy Gear')) then
         print(chat.header(addon.name) .. chat.message('Updated Empyrean Gear'));
-        interface.manager.UpdateEmpyGear();
+        modifind.UpdateKeyItems(interface.data.keyitems);
+        interface.manager.UpdateEmpyGear(true);
     end
 end
 
@@ -2698,10 +2796,10 @@ function manager.DisplayScaleGear()
                                     imgui.TextColored(interface.colors.warning, 'Rank: ' .. tostring(interface.data.progress.gear.unm.scale[i][5]));
                                     imgui.TableNextColumn();
                                     if interface.data.progress.gear.unm.scale[i][5] == 0 then
-                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086) +1;
+                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6]+1 -- - modifind.countItemId(4086) +1;
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086) +1));
                                     else
-                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086);
+                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6]-- - modifind.countItemId(4086);
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086)));
                                     end
                                     imgui.TableNextColumn();
@@ -2710,7 +2808,7 @@ function manager.DisplayScaleGear()
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     imgui.TableNextColumn();
-                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6] - modifind.countItemId(4086) +1;
+                                    estmats = estmats + interface.data.progress.gear.unm.scale[i][6]+1 -- - modifind.countItemId(4086) +1;
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.scale[i][6]- modifind.countItemId(4086) +1));
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.scale[i][7];
@@ -2797,7 +2895,7 @@ end
 
 function manager.UpdateScaleGear()
     local temptracked = {};
-
+    local currentScales = modifind.countItemId(4086);
     for t = 1, #interface.data.progress.gear.unm.scale do
         temptracked[t] = {interface.data.progress.gear.unm.scale[t][2],interface.data.progress.gear.unm.scale[t][3]};
     end
@@ -2839,7 +2937,7 @@ function manager.UpdateScaleGear()
                         points = points + manager.pointsmap[i];
                     end
                 end
-            interface.data.progress.gear.unm.scale[x][6] = (points / 5);
+            interface.data.progress.gear.unm.scale[x][6] = (points / 5) - currentScales;
             end
             --update gil
             interface.data.progress.gear.unm.scale[x][7] = interface.data.prices['Lustreless Scales'][1] * interface.data.progress.gear.unm.scale[x][6];
@@ -2873,10 +2971,10 @@ function manager.DisplayHideGear()
                                     imgui.TextColored(interface.colors.warning, 'Rank: ' .. tostring(interface.data.progress.gear.unm.hide[i][5]));
                                     imgui.TableNextColumn();
                                     if interface.data.progress.gear.unm.hide[i][5] == 0 then
-                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087) +1;
+                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6]+1 -- - modifind.countItemId(4087) +1;
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087) +1));
                                     else
-                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087);
+                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] -- - modifind.countItemId(4087);
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087)));
                                     end
                                     imgui.TableNextColumn();
@@ -2885,7 +2983,7 @@ function manager.DisplayHideGear()
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     imgui.TableNextColumn();
-                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6] - modifind.countItemId(4087) +1;
+                                    estmats = estmats + interface.data.progress.gear.unm.hide[i][6]+1 -- - modifind.countItemId(4087) +1;
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.hide[i][6]- modifind.countItemId(4087) +1));
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.hide[i][7];
@@ -2972,7 +3070,7 @@ end
 
 function manager.UpdateHideGear()
     local temptracked = {};
-
+    local currentHides = modifind.countItemId(4087);
     for t = 1, #interface.data.progress.gear.unm.hide do
         temptracked[t] = {interface.data.progress.gear.unm.hide[t][2],interface.data.progress.gear.unm.hide[t][3]};
     end
@@ -3014,7 +3112,7 @@ function manager.UpdateHideGear()
                         points = points + manager.pointsmap[i];
                     end
                 end
-            interface.data.progress.gear.unm.hide[x][6] = (points / 5);
+            interface.data.progress.gear.unm.hide[x][6] = (points / 5) - currentHides;
             end
             --update gil
             interface.data.progress.gear.unm.hide[x][7] = interface.data.prices['Lustreless Hides'][1] * interface.data.progress.gear.unm.hide[x][6];
@@ -3048,10 +3146,10 @@ function manager.DisplayWingGear()
                                     imgui.TextColored(interface.colors.warning, 'Rank: ' .. tostring(interface.data.progress.gear.unm.wing[i][5]));
                                     imgui.TableNextColumn();
                                     if interface.data.progress.gear.unm.wing[i][5] == 0 then
-                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088) +1;
+                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6]+1 -- - modifind.countItemId(4088) +1;
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088) +1));
                                     else
-                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088);
+                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] -- - modifind.countItemId(4088);
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088)));
                                     end
                                     imgui.TableNextColumn();
@@ -3060,7 +3158,7 @@ function manager.DisplayWingGear()
                                 else
                                     imgui.TextColored(interface.colors.error, 'HQ NOT OWNED');
                                     imgui.TableNextColumn();
-                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6] - modifind.countItemId(4088) +1;
+                                    estmats = estmats + interface.data.progress.gear.unm.wing[i][6]+1 -- - modifind.countItemId(4088) +1;
                                     imgui.TextColored(interface.colors.warning, tostring(interface.data.progress.gear.unm.wing[i][6]- modifind.countItemId(4088) +1));
                                     imgui.TableNextColumn();
                                     estgil = estgil + interface.data.progress.gear.unm.wing[i][7];
@@ -3147,7 +3245,7 @@ end
 
 function manager.UpdateWingGear()
     local temptracked = {};
-
+    local currentWings = modifind.countItemId(4088);
     for t = 1, #interface.data.progress.gear.unm.wing do
         temptracked[t] = {interface.data.progress.gear.unm.wing[t][2],interface.data.progress.gear.unm.wing[t][3]};
     end
@@ -3189,7 +3287,7 @@ function manager.UpdateWingGear()
                         points = points + manager.pointsmap[i];
                     end
                 end
-            interface.data.progress.gear.unm.wing[x][6] = (points / 5);
+            interface.data.progress.gear.unm.wing[x][6] = (points / 5) - currentWings;
             end
             --update gil
             interface.data.progress.gear.unm.wing[x][7] = interface.data.prices['Lustreless wings'][1] * interface.data.progress.gear.unm.wing[x][6];
@@ -3197,36 +3295,33 @@ function manager.UpdateWingGear()
     end
 end
 
-function manager.DisplaySheolAGear();
+function manager.DisplaySheolGear1();
 
 end
 
-function manager.UpdateSheolAGear();
+function manager.UpdateSheolGear1();
 
 end
 
-function manager.DisplaySheolBGear();
+function manager.DisplaySheolGear2();
 
 end
 
-function manager.UpdateSheolBGear();
+function manager.UpdateSheolGear2();
 
 end
 
-function manager.DisplaySheolCGear();
-
-end
-
-function manager.UpdateSheolCGear();
-
-end
-
--- this update all gear function not currently used
 function manager.UpdateGear()
-	manager.UpdateAmbuGear();
-    manager.UpdateEmpyGear();
-    manager.UpdateRelicGear();
+    modifind.UpdateInventory();
+    modifind.UpdateKeyItems(interface.data.keyitems);
     manager.UpdateAFGear();
+    manager.UpdateRelicGear();
+    manager.UpdateEmpyGear(false);
+	manager.UpdateAmbuGear();
+    manager.UpdateScaleGear();
+    manager.UpdateHideGear();
+    manager.UpdateWingGear();
+    print(chat.header(addon.name) .. chat.message('Updated All Gear'));
 end
 
 function manager.DisplayHallmarks()
@@ -3238,7 +3333,12 @@ function manager.DisplayHallmarks()
     end
 
     imgui.NewLine();
-    imgui.TextColored(interface.colors.header, 'NEEDED HALLMARK POINTS:');imgui.SameLine();imgui.Text('    ' .. interface.manager.comma_value(total) .. '    ');
+    imgui.TextColored(interface.colors.header, 'NEEDED HALLMARK POINTS:');imgui.SameLine();
+    imgui.Text('    ' .. interface.manager.comma_value(total) .. '    ');imgui.SameLine();
+    imgui.TextColored(interface.colors.header, '    CURRENT HALLMARK POINTS:');imgui.SameLine();
+    imgui.Text('    ' .. interface.manager.comma_value(interface.data.current['Hallmarks'][1]) .. '    ');imgui.SameLine();
+    imgui.TextColored(interface.colors.header, '    TOTAL HALLMARK POINTS:');imgui.SameLine();
+    imgui.Text('    ' .. interface.manager.comma_value(interface.data.current['Total Hallmarks'][1]) .. '    ');
     imgui.NewLine();imgui.Separator();imgui.NewLine();
 
     imgui.BeginTable('Weps', 8, ImGuiTableFlags_Borders);
@@ -3426,7 +3526,10 @@ function manager.DisplayGallantry()
     end
 
     imgui.NewLine();
-    imgui.TextColored(interface.colors.header, 'NEEDED GALLANTRY POINTS:');imgui.SameLine();imgui.Text('    ' .. interface.manager.comma_value(total));
+    imgui.TextColored(interface.colors.header, 'NEEDED GALLANTRY POINTS:');imgui.SameLine();
+    imgui.Text('    ' .. interface.manager.comma_value(total) .. '    ');imgui.SameLine();
+    imgui.TextColored(interface.colors.header, '    CURRENT GALLANTRY POINTS:');imgui.SameLine();
+    imgui.Text('    ' .. interface.manager.comma_value(interface.data.current['Gallantry'][1]) .. '    ');
     imgui.NewLine();imgui.Separator();imgui.NewLine();
 
     imgui.BeginTable('Weps', 8, ImGuiTableFlags_Borders);
@@ -3648,81 +3751,110 @@ end
 
 function manager.HandleOboro(e)
     local words = e.message:args();
-    if (not e.injected) and (string.match(e.message, 'You\'ve given me ')) then
-        if (words[12] == 'Another') then 
-            local chars = words[20]:split("")--Need to account for multi names here, Death Penalty for example
-            local weaponArr = {}
-            local weapon = ''
-            for x=1, #chars do
-                if string.match(chars[x], "%a") then--or string.match(chars[x], "%s") then
-                    weaponArr[#weaponArr +1] = chars[x]
-                end
-            end
+    -- if (not e.injected) and e.message:contains('given me') then
+    -- -- if (not e.injected) and (string.match(e.message, 'You\'ve given me ')) then
+    --     -- print(chat.header(addon.name) .. chat.message(words[22]));
+    --     if (words[12] == 'Another') then 
+    --         local chars = words[20]:split("")--Need to account for multi names here, Death Penalty for example
+    --         local weaponArr = {}
+    --         local weapon = ''
+    --         for x=1, #chars do
+    --             if string.match(chars[x], "%a") then--or string.match(chars[x], "%s") then
+    --                 weaponArr[#weaponArr +1] = chars[x]
+    --             end
+    --         end
             
-            for y = 1, #weaponArr do
-                weapon = weapon .. weaponArr[y]
-            end
-            -- print(chat.header(addon.name) .. chat.message(words[9]));
+    --         for y = 1, #weaponArr do
+    --             weapon = weapon .. weaponArr[y]
+    --         end
+    --         -- print(chat.header(addon.name) .. chat.message(words[9]));
 
-            local found = false
+    --         -- local found = false
             
-            for w = 1, #interface.defaults.ergons do
-                if interface.defaults.ergons[w] == weapon then
-                    interface.data.current['Ergon'][1] = weapon
-                    interface.data.current['Beitetsu'][2] = tonumber(words[13])--rocks remaining [2] for ergon
-                    found = true
-                end
-            end
+    --         for w = 1, #interface.defaults.ergons do
+    --             if interface.defaults.ergons[w] == weapon then
+    --                 interface.data.current['Ergon'][1] = weapon
+    --                 interface.data.current['Beitetsu'][2] = tonumber(words[13])--rocks remaining [2] for ergon
+    --                 -- found = true
+    --             end
+    --         end
+    --     elseif (words[12] == 'Placeholder') then
+    --         -- if found == false then
+    --             for w = 1, #interface.defaults.relics do
+    --                 if interface.defaults.relics[w] == weapon then
+    --                     interface.data.current['Relic'][1] = weapon
+    --                     interface.data.current['Pluton'][1] = tonumber(words[13])--rocks remaining
+    --                     -- found = true
+    --                 end
+    --             end
+    --         -- end
+    --     elseif (words[15] == 'beitetsu') then
+    --     --     if found == false then
+    --             -- for w = 1, #interface.defaults.mythics do
+    --                 -- if interface.defaults.mythics[w] == weapon then
+    --                     -- interface.data.current['Mythic'][2] = weapon -- [2] for oboro mythic, [1] is paparoon mythic
+    --                     interface.data.current['Beitetsu'][1] = tonumber(words[22])--rocks remaining
+    --                     -- found = true
+    --                 -- end
+    --             -- end
+    --     --     end
+    --     elseif (words[12] == 'Placeholder') then
+    --     --     if found == false then
+    --             for w = 1, #interface.defaults.empyreans do
+    --                 if interface.defaults.empyreans[w] == weapon then
+    --                     interface.data.current['Empyrean'][1] = weapon
+    --                     interface.data.current['Riftborn Boulder'][1] = tonumber(words[13]) --Need to add offset for empy rocks remaining
+    --                     -- found = true
+    --                 end
+    --             end
+    --     --     end
+    --     end
+    -- end
 
-            if found == false then
-                for w = 1, #interface.defaults.relics do
-                    if interface.defaults.relics[w] == weapon then
-                        interface.data.current['Relic'][1] = weapon
-                        interface.data.current['Pluton'][1] = tonumber(words[13])--rocks remaining
-                        found = true
-                    end
-                end
-            end
-            if found == false then
-                for w = 1, #interface.defaults.mythics do
-                    if interface.defaults.mythics[w] == weapon then
-                        interface.data.current['Mythic'][2] = weapon -- [2] for oboro mythic, [1] is paparoon mythic
-                        interface.data.current['Beitetsu'][1] = tonumber(words[13])--rocks remaining
-                        found = true
-                    end
-                end
-            end
-            if found == false then
-                for w = 1, #interface.defaults.empyreans do
-                    if interface.defaults.empyreans[w] == weapon then
-                        interface.data.current['Empyrean'][1] = weapon
-                        interface.data.current['Riftborn Boulder'][1] = tonumber(words[13]) --Need to add offset for empy rocks remaining
-                        found = true
-                    end
-                end
-            end
-        end
+    -- Relic pluton string
+    if (words[6 + interface.timestamps] == 'goods,') and (words[21 + interface.timestamps] == 'more.') and (words[13 + interface.timestamps]:contains('pluton')) then
+        interface.data.current['Pluton'][1] = tonumber(words[20 + interface.timestamps])--rocks remaining
+    elseif (words[5 + interface.timestamps] == 'enough') and (words[6 + interface.timestamps]:contains('pluton')) then
+        interface.data.current['Pluton'][1] = 0
     end
-    
+    -- Mythic beitetsu string
+    if (words[6 + interface.timestamps] == 'goods,') and (words[23 + interface.timestamps] == 'more.') and (words[15 + interface.timestamps]:contains('beitetsu')) then
+        interface.data.current['Beitetsu'][1] = tonumber(words[22 + interface.timestamps])--rocks remaining
+    elseif (words[5 + interface.timestamps] == 'enough') and (words[6 + interface.timestamps]:contains('beitetsu')) then
+        interface.data.current['Beitetsu'][1] = 0
+    end
 end
 
 function manager.HandlePaparoon(e)
     local words = e.message:args();
-    if (not e.injected) and (string.match(e.message, 'Yooo find Paparoon ')) then
-        if (words[7] == 'more') then
-            interface.data.current['Alexandrite'][1] = tonumber(words[6])
-        end
+    if e.message:contains('more shinies') then
+        interface.data.current['Alexandrite'][1] = tonumber(words[6 + interface.timestamps]);
+    elseif e.message:contains('Yooo found all the shinies the Empress') then
+        interface.data.current['Alexandrite'][1] = 0;
     end
 end
 
 function manager.PacketInCurrency(e)
     interface.data.current['Tokens'][1] = struct.unpack("I", e.data, 0x94)/256;
     interface.data.current['Ichor'][1] = struct.unpack("I", e.data, 0xA0)/256;
+    interface.data.stored["Rem's Tale Ch.1"] = struct.unpack("B", e.data, 0xCF);
+    interface.data.stored["Rem's Tale Ch.2"] = struct.unpack("B", e.data, 0xD0);
+    interface.data.stored["Rem's Tale Ch.3"] = struct.unpack("B", e.data, 0xD1);
+    interface.data.stored["Rem's Tale Ch.4"] = struct.unpack("B", e.data, 0xD2);
+    interface.data.stored["Rem's Tale Ch.5"] = struct.unpack("B", e.data, 0xD3);
+    interface.data.stored["Rem's Tale Ch.6"] = struct.unpack("B", e.data, 0xD4);
+    interface.data.stored["Rem's Tale Ch.7"] = struct.unpack("B", e.data, 0xD5);
+    interface.data.stored["Rem's Tale Ch.8"] = struct.unpack("B", e.data, 0xD6);
+    interface.data.stored["Rem's Tale Ch.9"] = struct.unpack("B", e.data, 0xD7);
+    interface.data.stored["Rem's Tale Ch.10"] = struct.unpack("B", e.data, 0xD8);
 end
 
 function manager.PacketInCurrency2(e)
     interface.data.current['Plasm'][1] = struct.unpack("I", e.data, 0x14)/256;
     interface.data.current['Gallimaufry'][1] = struct.unpack("I", e.data, 0x90)/256;
+    interface.data.current['Hallmarks'][1] = struct.unpack("I", e.data, 0x54)/256;
+    interface.data.current['Total Hallmarks'][1] = struct.unpack("I", e.data, 0x58)/256;
+    interface.data.current['Gallantry'][1] = struct.unpack("I", e.data, 0x5C)/256;
 end
 
 function manager.comma_value(n) --credit--http://richard.warburton.it
@@ -3732,9 +3864,19 @@ end
 
 function manager.Test()
     -- AshitaCore:GetChatManager():QueueCommand(-1, '/db reset');
-    local myIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
-	local my = GetEntity(myIndex);
+    -- local myIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
+	-- local my = GetEntity(myIndex);
     -- print(tostring(my.Race))
+    print(tostring(interface.data.stored["Rem's Tale Ch.1"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.2"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.3"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.4"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.5"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.6"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.7"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.8"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.9"]))
+    print(tostring(interface.data.stored["Rem's Tale Ch.10"]))
 end
 
 return manager;

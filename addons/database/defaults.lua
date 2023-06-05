@@ -263,30 +263,6 @@ defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
             {9698,9699,9700,9701,9702,9703,9704,9705,9706,9707,9708,9709,9710,9711,9712,9713,9714,9715,9716,9717,9718,9719},
             {9742,9743,9744,9745,9746,9747,9748,9749,9750,9751,9752,9753,9754,9755,9756,9757,9758,9759,9760,9761,9762,9763},
         },
-        relicUnlockKeyItems = {
-            'Courageous warrior\'s shard',
-            'Dedicated monk\'s shard',
-            'Stalwart white mage\'s shard',
-            'Storied black mage\'s shard',
-            'Peerless red mage\'s shard',
-            'Refined thief\'s shard',
-            'Elegant paladin\'s shard',
-            'Stoic dark knight\'s shard',
-            'Fervent beastmaster\'s shard',
-            'Distinguished bard\'s shard',
-            'Relentless ranger\'s shard',
-            'Inimitable samurai\'s shard',
-            'Valiant ninja\'s shard',
-            'Heroic dragoon\'s shard',
-            'Learned summoner\'s shard',
-            'Unrivalled blue mage\'s shard',
-            'Unparalleled corsair\'s shard',
-            'Dignified puppetmaster\'s shard',
-            'Graceful dancer\'s shard',
-            'Clever scholar\'s shard',
-            'Dynamic geomancer\'s shard',
-            'Ardent rune fencer\'s shard',
-        },
 
         empyrean = {--nq,+1,+2,109,119+1,119+2,119+3
             T{T{12008,11164,11064,26740,26741,23085,23420},T{12028,11184,11084,26898,26899,23152,23487},T{12048,11204,11104,27052,27053,23219,23554},T{12068,11224,11124,27237,27238,23286,23621},T{12088,11244,11144,27411,27412,23353,23688}},--war
@@ -316,30 +292,6 @@ defaults = T{ --[[ Default Table and Array values, NO TOUCHY!!! ]]
             {{0,0,0,0,},{0,0,0,0,},{0,0,0,0,},{0,0,0,0,},{0,0,0,0,}},-- +2 head > feet; {stone,jewel,coin,card}
             {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}},-- 109 head > feet; {chapters,slot mat,briareus,itzpapalotl,orthus,glavoid,lanterns,alfard,kukulkan,cara,dragua,ulhuadshi,apademak,bukhis,azdaja,isgebind,sobek,chloris,sedna}
             {{0,0,0},{0,0,0},{0,0,0},{0,0,0},{0,0,0}},-- 109 head > feet; {chapters,slot mat,etched memories}
-        },
-        empyUnlockKeyItems = {
-            'Courageous warrior\'s soul',
-            'Dedicated monk\'s soul',
-            'Stalwart white mage\'s soul',
-            'Storied black mage\'s soul',
-            'Peerless red mage\'s soul',
-            'Refined thief\'s soul',
-            'Elegant paladin\'s soul',
-            'Stoic dark knight\'s soul',
-            'Fervent beastmaster\'s soul',
-            'Distinguished bard\'s soul',
-            'Relentless ranger\'s soul',
-            'Inimitable samurai\'s soul',
-            'Valiant ninja\'s soul',
-            'Heroic dragoon\'s soul',
-            'Learned summoner\'s soul',
-            'Unrivalled blue mage\'s soul',
-            'Unparalleled corsair\'s soul',
-            'Dignified puppetmaster\'s soul',
-            'Graceful dancer\'s soul',
-            'Clever scholar\'s soul',
-            'Dynamic geomancer\'s soul',
-            'Ardent rune fencer\'s soul',
         },
 
         ambu = {-- Sulevia's > Mallquis, Head > Feet, {nq,hq1,hq2}

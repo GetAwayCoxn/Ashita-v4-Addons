@@ -1,7 +1,8 @@
 interface = T{
     manager = require('manager'),
     settings = require('settings'),
-    is_open = { false, },
+    is_open = { true, },
+    timestamps = 1, -- 1 if you use the timestamps addon, 0 if not, this will affect the automatic reading from Oboro, Paparoon, etc.
     progress_defaults = require('progress_defaults'),
     defaults = require('defaults'),
     colors = {
@@ -170,18 +171,13 @@ function interface.RenderGearTab()
                 if (imgui.BeginTabItem('ODYSSEA', nil)) then
                 imgui.BeginChild('OdyGearPane', { 0, 600, }, true);
                     if (imgui.BeginTabBar('ody_gear_tabbar', ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)) then
-                        if (imgui.BeginTabItem('SHEOL A', nil)) then
-                            interface.manager.DisplaySheolAGear();
+                        if (imgui.BeginTabItem('Tier 1/2', nil)) then
+                            interface.manager.DisplaySheolGear1();
                         imgui.EndTabItem();
                         end
 
-                        if (imgui.BeginTabItem('SHEOL B', nil)) then
-                            interface.manager.DisplaySheolBGear();
-                        imgui.EndTabItem();
-                        end
-
-                        if (imgui.BeginTabItem('SHEOL C', nil)) then
-                            interface.manager.DisplaySheolCGear();
+                        if (imgui.BeginTabItem('Tier 3/4', nil)) then
+                            interface.manager.DisplaySheolGear2();
                         imgui.EndTabItem();
                         end
                     imgui.EndTabBar();
@@ -189,14 +185,16 @@ function interface.RenderGearTab()
                 imgui.EndChild();
                 imgui.EndTabItem();
                 end
-            
+
             imgui.EndTabBar();
             end
         imgui.EndChild();
 
-        if (imgui.Button('Test')) then
-            interface.manager.Test();
+        if (imgui.Button('Update All Gear')) then
+            interface.manager.UpdateGear();
+            -- interface.manager.Test();
         end
+        imgui.ShowHelp('This may cause you to lag hard for a moment')
     imgui.EndGroup();
 end
 
@@ -216,6 +214,7 @@ function interface.RenderAMBUPointsTab()
             end
         imgui.EndChild();
         if (imgui.Button('Reset Monthly AMBU')) then
+            print(chat.header(addon.name) .. chat.message('Ambu points reset'));
             interface.manager.ResetAMBU();
         end
         imgui.SameLine();imgui.ShowHelp('Click to reset to default, cannot undo this action, this will also update the AMBU weapons section');
@@ -227,38 +226,38 @@ function interface.RenderPricesTab()
         imgui.BeginChild('prices_mainpane', { 0, -imgui.GetFrameHeightWithSpacing(), }, true);
             if (imgui.BeginTabBar('prices', ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)) then
                 if (imgui.BeginTabItem('COMMON', nil)) then
-                    imgui.InputInt('Pluton', interface.data.prices['Pluton']);
-                    imgui.InputInt('Beitetsu', interface.data.prices['Beitetsu']);
-                    imgui.InputInt('Riftborn Boulder', interface.data.prices['Riftborn Boulder']);
-                    imgui.InputInt('Sad. Crystals', interface.data.prices['Sad. Crystals']);
+                    imgui.InputInt('Pluton', interface.data.prices['Pluton'], 100, 1000);
+                    imgui.InputInt('Beitetsu', interface.data.prices['Beitetsu'], 100, 1000);
+                    imgui.InputInt('Riftborn Boulder', interface.data.prices['Riftborn Boulder'], 100, 1000);
+                    imgui.InputInt('Sad. Crystals', interface.data.prices['Sad. Crystals'], 1000, 10000);
                 imgui.EndTabItem();
                 end
                 if (imgui.BeginTabItem('DYNA CURRENCY', nil)) then
-                    imgui.InputInt('Byne Bills', interface.data.prices['Byne Bills']);
-                    imgui.InputInt('Bronze Pieces', interface.data.prices['Bronze Pieces']);
-                    imgui.InputInt('T. Whiteshells', interface.data.prices['T. Whiteshells']);
-                    imgui.InputInt('Umbral Marrow', interface.data.prices['Umbral Marrow']);
+                    imgui.InputInt('Byne Bills', interface.data.prices['Byne Bills'], 100, 1000);
+                    imgui.InputInt('Bronze Pieces', interface.data.prices['Bronze Pieces'], 100, 1000);
+                    imgui.InputInt('T. Whiteshells', interface.data.prices['T. Whiteshells'], 100, 1000);
+                    imgui.InputInt('Umbral Marrow', interface.data.prices['Umbral Marrow'], 10000, 100000);
                 imgui.EndTabItem();
                 end
                 if (imgui.BeginTabItem('MYTHIC CURRENCY', nil)) then
-                    imgui.InputInt('Alexandrite', interface.data.prices['Alexandrite']);
-                    imgui.InputInt('Mulcibar\'s Scoria', interface.data.prices['Mulcibar\'s Scoria']);
+                    imgui.InputInt('Alexandrite', interface.data.prices['Alexandrite'], 100, 1000);
+                    imgui.InputInt('Mulcibar\'s Scoria', interface.data.prices['Mulcibar\'s Scoria'], 10000, 100000);
                 imgui.EndTabItem();
                 end
                 if (imgui.BeginTabItem('EMPYREAN CURRENCY', nil)) then
-                    imgui.InputInt('Riftcinder', interface.data.prices['Riftcinder']);
-                    imgui.InputInt('Riftdross', interface.data.prices['Riftdross']);
-                    imgui.InputInt('Heavy Metal Plates', interface.data.prices['Heavy Metal Plates']);
+                    imgui.InputInt('Riftcinder', interface.data.prices['Riftcinder'], 1000, 10000);
+                    imgui.InputInt('Riftdross', interface.data.prices['Riftdross'], 1000, 10000);
+                    imgui.InputInt('Heavy Metal Plates', interface.data.prices['Heavy Metal Plates'], 1000, 10000);
                 imgui.EndTabItem();
                 end
                 if (imgui.BeginTabItem('ERGON CURRENCY', nil)) then
-                    imgui.InputInt('H-P Bayld', interface.data.prices['H-P Bayld']);
+                    imgui.InputInt('H-P Bayld', interface.data.prices['H-P Bayld'], 100, 1000);
                 imgui.EndTabItem();
                 end
                 if (imgui.BeginTabItem('ODY ITEMS', nil)) then
-                    imgui.InputInt('Lustreless Scales', interface.data.prices['Lustreless Scales']);
-                    imgui.InputInt('Lustreless Hides', interface.data.prices['Lustreless Hides']);
-                    imgui.InputInt('Lustreless Wings', interface.data.prices['Lustreless Wings']);
+                    imgui.InputInt('Lustreless Scales', interface.data.prices['Lustreless Scales'], 100, 1000);
+                    imgui.InputInt('Lustreless Hides', interface.data.prices['Lustreless Hides'], 100, 1000);
+                    imgui.InputInt('Lustreless Wings', interface.data.prices['Lustreless Wings'], 100, 1000);
                 imgui.EndTabItem();
                 end
             imgui.EndTabBar();
@@ -273,8 +272,8 @@ function interface.Render()
         return;
     end
 
-    imgui.SetNextWindowSize({ 1000, 730, });
-    imgui.SetNextWindowSizeConstraints({ 1000, 720, }, { FLT_MAX, FLT_MAX, });
+    imgui.SetNextWindowSize({ 1000, 750, });
+    imgui.SetNextWindowSizeConstraints({ 1000, 750, }, { FLT_MAX, FLT_MAX, });
     if (imgui.Begin('Database', interface.is_open, ImGuiWindowFlags_NoResize)) then
         if (imgui.BeginTabBar('##database_tabbar', ImGuiTabBarFlags_NoCloseWithMiddleMouseButton)) then
             if (imgui.BeginTabItem('JOBS', nil)) then
