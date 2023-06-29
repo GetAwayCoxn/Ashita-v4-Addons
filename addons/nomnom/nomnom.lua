@@ -1,6 +1,6 @@
 addon.name      = 'nomnom'
 addon.author    = 'GetAwayCoxn'
-addon.version   = '1.10'
+addon.version   = '1.11'
 addon.desc      = 'Eats food.'
 addon.link      = 'https://github.com/GetAwayCoxn/'
 
@@ -67,7 +67,9 @@ ashita.events.register('d3d_present', 'present_cb', function()
         --Kick out if no food selected on menu, else eat food since no Food buff found
         if not full and status == 0 then
             local function recount()
-                settings.food[settings.menu_holder[1]+1][2] = CountItemName(currentFood)
+                if settings.food then
+                    settings.food[settings.menu_holder[1]+1][2] = CountItemName(currentFood)
+                end
             end
             -- Make sure the count is still good in case inventory has moved around since last food try
             if settings.food[settings.menu_holder[1]+1] then
@@ -110,7 +112,7 @@ ashita.events.register('d3d_present', 'present_cb', function()
             if settings.menu_holder[1] < 0 then
                 print(chat.header('NomNom'):append(chat.message('Disabling due to no food chosen')))
                 settings.enabled = 'Disabled'
-            else 
+            else
                 currentFood = settings.food[settings.menu_holder[1] + 1][1]
             end
         end
