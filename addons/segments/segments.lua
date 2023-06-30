@@ -1,6 +1,6 @@
 addon.name      = 'segments'
 addon.author    = 'GetAwayCoxn'
-addon.version   = '1.0'
+addon.version   = '1.01'
 addon.desc      = 'quick display of how many segments you are getting in odyssey'
 addon.link      = 'https://github.com/GetAwayCoxn/Ashita-v4-Addons'
 
@@ -54,6 +54,7 @@ ashita.events.register('command', 'command_cb', function (e)
     if args[2]:any('reset') then
         newrun = true
         display.visible = false
+        currentSegs = 0
     end
 end)
 
