@@ -96,7 +96,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     imgui.End()
 end)
 
-ashita.events.register('packet_in', 'packet_in_callback1', function (e)
+ashita.events.register('packet_in', 'packet_in_callback1', function(e)
+    -- Borrowed this logic from https://github.com/zechs6437/boxdestroyer-ashita-addon
     if e.id == 0x34 then
         local box_id = struct.unpack('H' , e.data, 41)
         if AshitaCore:GetMemoryManager():GetEntity():GetName(box_id) == 'Treasure Casket' then

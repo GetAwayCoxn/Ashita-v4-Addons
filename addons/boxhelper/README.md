@@ -8,7 +8,7 @@ There are no commands, just talk to a brown treasure chest and it will open a im
 
 ## Notes:
 
-- This is not a direct port from any other addon
+- This is not a direct port from any other addon, but I did borrow some packet logic from https://github.com/zechs6437/boxdestroyer-ashita-addon to read the chances remaining
 - This does most the heavy lifting from parsing the chat log not from packets
 - I have used this to open a couple hundred boxes in retail for my crafting torques and should work fine for anyone else on retail
 
