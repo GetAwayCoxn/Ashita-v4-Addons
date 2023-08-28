@@ -1,6 +1,6 @@
 addon.name      = 'mountme'
 addon.author    = 'GetAwayCoxn'
-addon.version   = '1.0'
+addon.version   = '1.01'
 addon.desc      = 'mountme'
 addon.link      = 'https://github.com/GetAwayCoxn/Ashita-v4-Addons'
 
@@ -72,8 +72,26 @@ function UpdateMountList()
 end
 
 function PickMount()
+    if CheckIfMounted() then
+        AshitaCore:GetChatManager():QueueCommand(1, '/dismount')
+        return
+    end
     UpdateMountList()
     math.randomseed(os.time())
     local idx = math.random(#myMounts)
-    AshitaCore:GetChatManager():QueueCommand(1, '/mount "' .. myMounts[idx] .. '"')
+    if myMounts[idx] then
+        AshitaCore:GetChatManager():QueueCommand(1, '/mount "' .. myMounts[idx] .. '"')
+    end
+end
+
+function CheckIfMounted()
+    local R = AshitaCore:GetResourceManager()
+    local buffs = AshitaCore:GetMemoryManager():GetPlayer():GetBuffs()
+    for _, buff in pairs(buffs) do
+        local buffString = R:GetString("buffs.names", buff)
+        if buffString and buffString == "Mounted" then
+            return true
+        end
+    end
+    return false
 end
