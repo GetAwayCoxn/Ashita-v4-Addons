@@ -1,6 +1,6 @@
 addon.name      = 'Runehelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.05';
+addon.version   = '1.06';
 addon.desc      = 'Does runefencer things.';
 addon.link      = 'https://github.com/GetAwayCoxn/Rune-Helper';
 
@@ -29,7 +29,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     local MyStatus = AshitaCore:GetMemoryManager():GetEntity():GetStatus(AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0))
 
     -- Force Disabled under these conditions
-    if (Player:GetIsZoning() ~= 0) or (Area == nil) or (Towns:contains(Area)) or ((Player:GetMainJob() ~= 22) and (Player:GetSubJob() ~= 22)) or (MyStatus == 2 or MyStatus == 3) then 
+    if (Player:GetIsZoning() ~= 0) or (Area == nil) or (Towns:contains(Area)) or ((Player:GetMainJob() ~= 22) and (Player:GetSubJob() ~= 22)) or (MyStatus == 2 or MyStatus == 3) then
 		manager.enabled = 'Disabled';
 	end
 
@@ -56,7 +56,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                     total = total + 1;
                 elseif (buffString ~= nil) and (buffString == 'Mounted') then
                     manager.enabled = 'Disabled';
-                elseif (buffString ~= nil) and ((buffString == 'Sleep') or (buffString == 'Charm') or (buffString == 'Terror') or (buffString == 'Petrification') or (buffString == 'Stun')) then
+                elseif (buffString ~= nil) and ((buffString == 'Sleep') or (buffString == 'Terror') or (buffString == 'Charm') or (buffString == 'Stun') or (buffString == 'Petrification') or (buffString == 'Amnesia')) then
                     return;
                 end
             end
@@ -161,7 +161,6 @@ function CheckAbilityRecast(check)
 
 		if ((id ~= 0 or x == 0) and timer > 0) then
 			local ability = AshitaCore:GetResourceManager():GetAbilityByTimerId(id);
-            
 			if (ability ~= nil and ability.Name[1] == check) then
 				RecastTime = timer;
 			end
