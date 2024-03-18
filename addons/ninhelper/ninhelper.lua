@@ -1,6 +1,6 @@
 addon.name      = 'NINhelper';
 addon.author    = 'GetAwayCoxn';
-addon.version   = '1.00';
+addon.version   = '1.01';
 addon.desc      = 'Does ninja things.';
 addon.link      = 'https://github.com/GetAwayCoxn/';
 
@@ -90,7 +90,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 
             -- Do buffs
             if vars.doShadows[1] and not vars.hasShadows then
-                local utsuTeir = ''
+                local utsuTeir = nil
                 if player:HasSpell(enums.san) and CheckSpellRecast(enums.san) == 0 then
                     utsuTeir = 'San';
                 elseif player:HasSpell(enums.ni) and CheckSpellRecast(enums.ni) == 0 then
@@ -98,20 +98,21 @@ ashita.events.register('d3d_present', 'present_cb', function ()
                 elseif player:HasSpell(enums.ichi) and CheckSpellRecast(enums.ichi) == 0 then
                     utsuTeir = 'Ichi';
                 end
-
-                if CheckTools(enums.shihei) then
-                    AshitaCore:GetChatManager():QueueCommand(1, '/ma "Utsusemi: ' .. utsuTeir .. '" <me>');
-                elseif CheckTools(enums.shiheiBags) then
-                    AshitaCore:GetChatManager():QueueCommand(1, '/item "Toolbag (Shihe)" <me>');
-                elseif vars.useShikaShadows then
-                    if CheckTools(enums.shikanofuda) then
+		if utsuTeir then
+                    if CheckTools(enums.shihei) then
                         AshitaCore:GetChatManager():QueueCommand(1, '/ma "Utsusemi: ' .. utsuTeir .. '" <me>');
-                    elseif CheckTools(enums.shikanofudaBags) then
-                        AshitaCore:GetChatManager():QueueCommand(1, '/item "Toolbag (Shika)" <me>');
+                    elseif CheckTools(enums.shiheiBags) then
+                        AshitaCore:GetChatManager():QueueCommand(1, '/item "Toolbag (Shihe)" <me>');
+                    elseif vars.useShikaShadows then
+                        if CheckTools(enums.shikanofuda) then
+                            AshitaCore:GetChatManager():QueueCommand(1, '/ma "Utsusemi: ' .. utsuTeir .. '" <me>');
+                        elseif CheckTools(enums.shikanofudaBags) then
+                            AshitaCore:GetChatManager():QueueCommand(1, '/item "Toolbag (Shika)" <me>');
+                        end
+                    else
+                        Message('Out of Tools and Bags for SHADOWS!');
+                        vars.doShadows[1] = false;
                     end
-                else
-                    Message('Out of Tools and Bags for SHADOWS!');
-                    vars.doShadows[1] = false;
                 end
             elseif vars.doMigawari[1] then 
                 if not vars.hasMigawari and player:HasSpell(enums.migawari) then
